@@ -1,9 +1,7 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using MyStore.Data;
+﻿using Microsoft.AspNetCore.Mvc;
 using MyStore.Models;
-using MyStore.Services;
+using MyStore.Request;
+using MyStore.Services.Brands;
 
 namespace MyStore.Controllers
 {
@@ -18,17 +16,26 @@ namespace MyStore.Controllers
         }
 
         [HttpGet]
-        [Authorize(Roles = "Admin")]
-        public ActionResult<List<Brand>> GetAllBrands()
+        //[Authorize(Roles = "Admin")]
+        public async Task<IActionResult> GetAllBrands(string? search)
         {
-            return _brandService.GetAllBrands();
+            try
+            {
+                //var e = User.FindFirstValue(ClaimTypes.Email);
+                var result =await _brandService.GetAllBrands(search);
+                return Ok(result);
+            }
+            catch
+            {
+                return BadRequest("We can not get the products");
+            }
         }
 
         [HttpGet("{id}")]
-        [Authorize(Roles = "Admin")]
-        public ActionResult<Brand> GetBrandById(int id)
+        //[Authorize(Roles = "Admin")]
+        public async Task<ActionResult<Brand>> GetBrandById(long id)
         {
-            var brand = _brandService.GetBrandById(id);
+            var brand = await _brandService.GetBrandById(id);
             if(brand == null)
             {
                 return NotFound();
@@ -37,19 +44,19 @@ namespace MyStore.Controllers
         }
 
         [HttpPost]
-        [Authorize(Roles = "Admin")]
-        public ActionResult<Brand> CreateBrand(Brand brand)
+        //[Authorize(Roles = "Admin")]
+        public async Task<ActionResult<Brand>> CreateBrand([FromForm] BrandRequest request)
         {
-            if(brand == null)
+            if(request == null)
             {
                 return BadRequest();
             }
-            var createBrand = _brandService.CreateBrand(brand);
+            var createBrand = await _brandService.CreateBrand(request);
             return CreatedAtAction(nameof(GetBrandById), new { id = createBrand.BrandID }, createBrand);
         }
         [HttpPut("{id}")]
-        [Authorize(Roles = "Admin")]
-        public ActionResult<Brand> UpdateBrand(int id, Brand brand)
+        //[Authorize(Roles = "Admin")]
+        public async Task<ActionResult<Brand>> UpdateBrand(long id, Brand brand)
         {
             if(brand == null)
             {
@@ -57,7 +64,7 @@ namespace MyStore.Controllers
             }
             try
             {
-                var updateBrand = _brandService.UpdateBrand(id, brand);
+                var updateBrand = await _brandService.UpdateBrand(id, brand);
                 return Ok(updateBrand);
             }
             catch (KeyNotFoundException)
@@ -65,6 +72,17 @@ namespace MyStore.Controllers
                 return NotFound();
             }
         }
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteBrand(long id)
+        {
+            var dbrand = await _brandService.DeleteBrand(id);
+            if(dbrand == null)
+            {
+                return NotFound();
+            }
+            return NoContent();
+        }
+
         
     }
 }

@@ -7,5 +7,6 @@ namespace MyStore.Models
         [Key]
         public long BrandID { get; set; }
         public string BrandName { get; set; }
+        public string Picture { get; set; }
     }
 }

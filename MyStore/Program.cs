@@ -1,11 +1,16 @@
 using MyStore.Data;
 using MyStore.Models;
-using MyStore.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using MyStore.Services.Users;
+using MyStore.Repository.Users;
+using MyStore.Services.SendMail;
+using MyStore.Services.Auth;
+using MyStore.Services.Caching;
+using MyStore.Services.Brands;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,10 +25,22 @@ builder.Services.AddDbContext<CompanyDBContext>(opt =>
 {
     opt.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
-builder.Services.AddIdentity<User, IdentityRole<int>>().AddEntityFrameworkStores<CompanyDBContext>().AddDefaultTokenProviders();
+builder.Services.AddIdentity<User, IdentityRole<int>>()
+    .AddEntityFrameworkStores<CompanyDBContext>()
+    .AddTokenProvider("MyStore", typeof(DataProtectorTokenProvider<User>));
+
+builder.Services.AddMemoryCache();
+builder.Services.AddSingleton<ICachingService, CachingService>();
 
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IBrandService, BrandService>();
+builder.Services.AddScoped<IUserService, UserService>();
+
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+
+builder.Services.Configure<MailSettings>(builder.Configuration.GetSection("MailSettings"));
+builder.Services.AddSingleton<ISendMailService, SendMailService>();
+
 
 builder.Services.AddAuthentication(option =>
 {
@@ -68,6 +85,8 @@ app.UseCors("MyCors");
 app.UseAuthentication();
 
 app.UseAuthorization();
+
+app.UseStaticFiles();
 
 app.MapControllers();
 
