@@ -11,6 +11,9 @@ using MyStore.Services.SendMail;
 using MyStore.Services.Auth;
 using MyStore.Services.Caching;
 using MyStore.Services.Brands;
+using MyStore.Services.Categories;
+using MyStore.Repository.CategoryRepository;
+using MyStore.Mapping;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -35,8 +38,10 @@ builder.Services.AddSingleton<ICachingService, CachingService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IBrandService, BrandService>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<ICategoryService, CategoryService>();
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 
 builder.Services.Configure<MailSettings>(builder.Configuration.GetSection("MailSettings"));
 builder.Services.AddSingleton<ISendMailService, SendMailService>();
@@ -60,6 +65,8 @@ builder.Services.AddAuthentication(option =>
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(builder.Configuration.GetSection("JWT:Key").Value ?? ""))
     };
 });
+
+builder.Services.AddAutoMapper(typeof(Mapping));
 
 builder.Services.AddCors(opt =>
 {

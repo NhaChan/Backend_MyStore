@@ -2,7 +2,7 @@
 
 namespace MyStore.Models
 {
-    public class Product
+    public class Product : IBaseEntity
     {
         [Key]
         public long ProductID { get; set; }
@@ -11,7 +11,11 @@ namespace MyStore.Models
         public string Description { get; set; }
         public double Discount { get; set; }
         public int Quanlity { get; set; }
-        public Caterory Caterory { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public DateTime? UpdatedAt { get; set; }
+
+
+        public Category Caterory { get; set; }
         public Brand Brand { get; set; }
         public Type Type { get; set; }
 

@@ -167,28 +167,40 @@ namespace MyStore.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("Picture")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
 
                     b.HasKey("BrandID");
 
                     b.ToTable("Brands");
                 });
 
-            modelBuilder.Entity("MyStore.Models.Caterory", b =>
+            modelBuilder.Entity("MyStore.Models.Category", b =>
                 {
-                    b.Property<long>("CategoryID")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
+                        .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("CategoryID"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("CategoryName")
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("CategoryID");
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
 
                     b.ToTable("Caterories");
                 });
@@ -201,24 +213,21 @@ namespace MyStore.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("ProductID"));
 
-                    b.Property<string>("AvailabilityStatus")
+                    b.Property<long>("BrandID")
+                        .HasColumnType("bigint");
+
+                    b.Property<int>("CateroryId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<bool?>("Avtive")
-                        .HasColumnType("bit");
-
-                    b.Property<long?>("BrandID")
-                        .HasColumnType("bigint");
-
-                    b.Property<long?>("CategoryID")
-                        .HasColumnType("bigint");
-
-                    b.Property<long>("CateroryCategoryID")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime?>("DateOfPurchase")
-                        .HasColumnType("datetime2");
+                    b.Property<double>("Discount")
+                        .HasColumnType("float");
 
                     b.Property<double>("Price")
                         .HasColumnType("float");
@@ -227,13 +236,47 @@ namespace MyStore.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("Quanlity")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TypeId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
                     b.HasKey("ProductID");
 
                     b.HasIndex("BrandID");
 
-                    b.HasIndex("CateroryCategoryID");
+                    b.HasIndex("CateroryId");
+
+                    b.HasIndex("TypeId");
 
                     b.ToTable("Products");
+                });
+
+            modelBuilder.Entity("MyStore.Models.Type", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Type");
                 });
 
             modelBuilder.Entity("MyStore.Models.User", b =>
@@ -250,6 +293,9 @@ namespace MyStore.Migrations
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Email")
                         .HasMaxLength(256)
@@ -290,6 +336,9 @@ namespace MyStore.Migrations
 
                     b.Property<bool>("TwoFactorEnabled")
                         .HasColumnType("bit");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("UserName")
                         .HasMaxLength(256)
@@ -363,17 +412,37 @@ namespace MyStore.Migrations
                 {
                     b.HasOne("MyStore.Models.Brand", "Brand")
                         .WithMany()
-                        .HasForeignKey("BrandID");
+                        .HasForeignKey("BrandID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                    b.HasOne("MyStore.Models.Caterory", "Caterory")
-                        .WithMany()
-                        .HasForeignKey("CateroryCategoryID")
+                    b.HasOne("MyStore.Models.Category", "Caterory")
+                        .WithMany("Products")
+                        .HasForeignKey("CateroryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("MyStore.Models.Type", "Type")
+                        .WithMany("Products")
+                        .HasForeignKey("TypeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Brand");
 
                     b.Navigation("Caterory");
+
+                    b.Navigation("Type");
+                });
+
+            modelBuilder.Entity("MyStore.Models.Category", b =>
+                {
+                    b.Navigation("Products");
+                });
+
+            modelBuilder.Entity("MyStore.Models.Type", b =>
+                {
+                    b.Navigation("Products");
                 });
 #pragma warning restore 612, 618
         }

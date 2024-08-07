@@ -1,6 +1,4 @@
-﻿using Azure.Core;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
+﻿using Microsoft.EntityFrameworkCore;
 using MyStore.Data;
 using MyStore.Models;
 using MyStore.Services;

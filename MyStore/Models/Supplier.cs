@@ -2,7 +2,7 @@
 
 namespace MyStore.Models
 {
-    public class Supplier
+    public class Supplier : IBaseEntity
     {
         [Key]
         public int SupplierID { get; set; }
@@ -12,5 +12,7 @@ namespace MyStore.Models
         public string Address { get; set; }
         public string Phone { get; set; }
         public string Status { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public DateTime? UpdatedAt { get; set; }
     }
 }
