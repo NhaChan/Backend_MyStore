@@ -5,7 +5,7 @@ using MyStore.Services.Categories;
 
 namespace MyStore.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/categories")]
     [ApiController]
     public class CategoryController : ControllerBase
     {
@@ -27,7 +27,7 @@ namespace MyStore.Controllers
             }
         }
 
-        [HttpPost("creat")]
+        [HttpPost("create")]
         public async Task<IActionResult> Creat([FromBody] NameRequest request)
         {
             try

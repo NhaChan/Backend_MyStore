@@ -9,6 +9,7 @@ namespace MyStore.Mapping
         public Mapping() 
         { 
             CreateMap<Category, CategoryDTO>().ReverseMap();
+            CreateMap<Brand, BrandDTO>().ReverseMap();
         }
     }
 }

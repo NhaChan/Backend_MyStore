@@ -157,27 +157,27 @@ namespace MyStore.Migrations
 
             modelBuilder.Entity("MyStore.Models.Brand", b =>
                 {
-                    b.Property<long>("BrandID")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
+                        .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("BrandID"));
-
-                    b.Property<string>("BrandName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("Picture")
+                    b.Property<string>("ImageUrl")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
 
-                    b.HasKey("BrandID");
+                    b.HasKey("Id");
 
                     b.ToTable("Brands");
                 });
@@ -213,8 +213,8 @@ namespace MyStore.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("ProductID"));
 
-                    b.Property<long>("BrandID")
-                        .HasColumnType("bigint");
+                    b.Property<int>("BrandId")
+                        .HasColumnType("int");
 
                     b.Property<int>("CateroryId")
                         .HasColumnType("int");
@@ -247,7 +247,7 @@ namespace MyStore.Migrations
 
                     b.HasKey("ProductID");
 
-                    b.HasIndex("BrandID");
+                    b.HasIndex("BrandId");
 
                     b.HasIndex("CateroryId");
 
@@ -412,7 +412,7 @@ namespace MyStore.Migrations
                 {
                     b.HasOne("MyStore.Models.Brand", "Brand")
                         .WithMany()
-                        .HasForeignKey("BrandID")
+                        .HasForeignKey("BrandId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

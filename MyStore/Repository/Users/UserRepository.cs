@@ -1,22 +1,23 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using MyStore.Data;
 using MyStore.Models;
+using MyStore.Repository.CommonRepository;
 using MyStore.Services;
 
 namespace MyStore.Repository.Users
 {
-    public class UserRepository: IUserRepository
+    public class UserRepository : CommonRepository<User> , IUserRepository
     {
         private readonly CompanyDBContext _context;
 
-        public UserRepository(CompanyDBContext context) {
-            _context = context;
+        public UserRepository(CompanyDBContext context) : base(context) {
+            _context = context; 
         }
 
-        public async Task<int> CountAsync()
-        {
-            return await _context.Users.CountAsync();
-        }
+        //public async Task<int> CountAsync()
+        //{
+        //    return await _context.Users.CountAsync();
+        //}
 
         public async Task<int> CountAsync(string search)
         {

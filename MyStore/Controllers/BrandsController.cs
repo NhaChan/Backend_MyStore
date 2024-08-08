@@ -5,7 +5,7 @@ using MyStore.Services.Brands;
 
 namespace MyStore.Controllers
 {
-    [Route("api/brand")]
+    [Route("api/brands")]
     [ApiController]
     public class BrandsController : ControllerBase
     {
@@ -17,72 +17,83 @@ namespace MyStore.Controllers
 
         [HttpGet]
         //[Authorize(Roles = "Admin")]
-        public async Task<IActionResult> GetAllBrands(string? search)
+        public async Task<IActionResult> GetAllBrand()
         {
             try
             {
                 //var e = User.FindFirstValue(ClaimTypes.Email);
-                var result =await _brandService.GetAllBrands(search);
+                var result =await _brandService.GetAllBrandsAsync();
                 return Ok(result);
             }
-            catch
+            catch (Exception ex)
             {
-                return BadRequest("We can not get the products");
+                return StatusCode(500, ex.Message);
             }
         }
 
-        [HttpGet("{id}")]
+        //[HttpGet("{id}")]
         //[Authorize(Roles = "Admin")]
-        public async Task<ActionResult<Brand>> GetBrandById(long id)
-        {
-            var brand = await _brandService.GetBrandById(id);
-            if(brand == null)
-            {
-                return NotFound();
-            }
-            return brand;
-        }
+        //public async Task<ActionResult<Brand>> GetBrandById(int id)
+        //{
+        //    var brand = await _brandService.GetBrandById(id);
+        //    if(brand == null)
+        //    {
+        //        return NotFound();
+        //    }
+        //    return brand;
+        //}
 
-        [HttpPost]
+        [HttpPost("create")]
         //[Authorize(Roles = "Admin")]
-        public async Task<ActionResult<Brand>> CreateBrand([FromForm] BrandRequest request)
+        public async Task<ActionResult> CreateBrand([FromForm] NameRequest request, [FromForm] IFormCollection files)
         {
-            if(request == null)
-            {
-                return BadRequest();
-            }
-            var createBrand = await _brandService.CreateBrand(request);
-            return CreatedAtAction(nameof(GetBrandById), new { id = createBrand.BrandID }, createBrand);
-        }
-        [HttpPut("{id}")]
-        //[Authorize(Roles = "Admin")]
-        public async Task<ActionResult<Brand>> UpdateBrand(long id, Brand brand)
-        {
-            if(brand == null)
-            {
-                return BadRequest();
-            }
             try
             {
-                var updateBrand = await _brandService.UpdateBrand(id, brand);
-                return Ok(updateBrand);
+                var image = files.Files.First();
+                var brand = await _brandService.CreateBrandAsync(request.Name, image);
+                return Ok(brand);
             }
-            catch (KeyNotFoundException)
+            catch (Exception ex)
             {
-                return NotFound();
+                return StatusCode(500, ex.Message);
             }
-        }
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteBrand(long id)
-        {
-            var dbrand = await _brandService.DeleteBrand(id);
-            if(dbrand == null)
-            {
-                return NotFound();
-            }
-            return NoContent();
         }
 
-        
+        [HttpPut("update/{id}")]
+        //[Authorize(Roles = "Admin")]
+        public async Task<ActionResult> UpdateBrand(int id, [FromForm] NameRequest request, [FromForm] IFormCollection files)
+        {
+            try
+            {
+                var image = files.Files.First();
+                var brand = await _brandService.UpdateBrandAsync(id, request.Name, image);
+                return Ok(brand);
+            }
+            catch(ArgumentException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch(Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
+        [HttpDelete("delete/{id}")]
+        public async Task<IActionResult> DeleteBrand(int id)
+        {
+            try
+            {
+                await _brandService.DeleteBrandAsync(id);
+                return NoContent();
+            }
+            catch(ArgumentException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch(Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
     }
 }

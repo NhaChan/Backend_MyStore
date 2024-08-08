@@ -14,6 +14,8 @@ using MyStore.Services.Brands;
 using MyStore.Services.Categories;
 using MyStore.Repository.CategoryRepository;
 using MyStore.Mapping;
+using MyStore.Storage;
+using MyStore.Repository.BrandRepository;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -35,6 +37,8 @@ builder.Services.AddIdentity<User, IdentityRole<int>>()
 builder.Services.AddMemoryCache();
 builder.Services.AddSingleton<ICachingService, CachingService>();
 
+builder.Services.AddScoped<IFileStorage, FileStorage>();
+
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IBrandService, BrandService>();
 builder.Services.AddScoped<IUserService, UserService>();
@@ -42,6 +46,7 @@ builder.Services.AddScoped<ICategoryService, CategoryService>();
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+builder.Services.AddScoped<IBrandRepository, BrandRepository>();
 
 builder.Services.Configure<MailSettings>(builder.Configuration.GetSection("MailSettings"));
 builder.Services.AddSingleton<ISendMailService, SendMailService>();

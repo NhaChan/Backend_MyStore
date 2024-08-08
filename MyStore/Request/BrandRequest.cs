@@ -2,7 +2,7 @@
 {
     public class BrandRequest
     {
-        public string BrandName { get; set; }
+        public string Name { get; set; }
         public IFormFile Image { get; set; }
     }
 }
