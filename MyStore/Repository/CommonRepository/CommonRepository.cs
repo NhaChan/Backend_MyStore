@@ -16,6 +16,12 @@ namespace MyStore.Repository.CommonRepository
             await _context.SaveChangesAsync();
         }
 
+        public virtual async Task AddAsync(IEnumerable<T> entities)
+        {
+            await _context.AddRangeAsync(entities);
+            await _context.SaveChangesAsync();
+        }
+
         public async Task<int> CountAsync() => await _context.Set<T>().CountAsync();
 
         public virtual async Task DeleteAsync(T entity)

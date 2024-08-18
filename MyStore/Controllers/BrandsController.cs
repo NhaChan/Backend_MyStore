@@ -68,7 +68,7 @@ namespace MyStore.Controllers
                 var image = files.Files.First();
                 var brand = await _brandService.UpdateBrandAsync(id, request.Name, image);
                 return Ok(brand);
-            }
+            }   
             catch(ArgumentException ex)
             {
                 return NotFound(ex.Message);

@@ -205,58 +205,7 @@ namespace MyStore.Migrations
                     b.ToTable("Caterories");
                 });
 
-            modelBuilder.Entity("MyStore.Models.Product", b =>
-                {
-                    b.Property<long>("ProductID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("ProductID"));
-
-                    b.Property<int>("BrandId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("CateroryId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<double>("Discount")
-                        .HasColumnType("float");
-
-                    b.Property<double>("Price")
-                        .HasColumnType("float");
-
-                    b.Property<string>("ProductName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("Quanlity")
-                        .HasColumnType("int");
-
-                    b.Property<int>("TypeId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("ProductID");
-
-                    b.HasIndex("BrandId");
-
-                    b.HasIndex("CateroryId");
-
-                    b.HasIndex("TypeId");
-
-                    b.ToTable("Products");
-                });
-
-            modelBuilder.Entity("MyStore.Models.Type", b =>
+            modelBuilder.Entity("MyStore.Models.Image", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -267,16 +216,66 @@ namespace MyStore.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("Name")
+                    b.Property<string>("ImageUrl")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Type");
+                    b.HasIndex("ProductId");
+
+                    b.ToTable("Images");
+                });
+
+            modelBuilder.Entity("MyStore.Models.Product", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("BrandId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("CategoryId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<double>("Discount")
+                        .HasColumnType("float");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<double>("Price")
+                        .HasColumnType("float");
+
+                    b.Property<int>("Quanlity")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BrandId");
+
+                    b.HasIndex("CategoryId");
+
+                    b.ToTable("Products");
                 });
 
             modelBuilder.Entity("MyStore.Models.User", b =>
@@ -408,6 +407,17 @@ namespace MyStore.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("MyStore.Models.Image", b =>
+                {
+                    b.HasOne("MyStore.Models.Product", "Product")
+                        .WithMany("Images")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Product");
+                });
+
             modelBuilder.Entity("MyStore.Models.Product", b =>
                 {
                     b.HasOne("MyStore.Models.Brand", "Brand")
@@ -418,21 +428,13 @@ namespace MyStore.Migrations
 
                     b.HasOne("MyStore.Models.Category", "Caterory")
                         .WithMany("Products")
-                        .HasForeignKey("CateroryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("MyStore.Models.Type", "Type")
-                        .WithMany("Products")
-                        .HasForeignKey("TypeId")
+                        .HasForeignKey("CategoryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Brand");
 
                     b.Navigation("Caterory");
-
-                    b.Navigation("Type");
                 });
 
             modelBuilder.Entity("MyStore.Models.Category", b =>
@@ -440,9 +442,9 @@ namespace MyStore.Migrations
                     b.Navigation("Products");
                 });
 
-            modelBuilder.Entity("MyStore.Models.Type", b =>
+            modelBuilder.Entity("MyStore.Models.Product", b =>
                 {
-                    b.Navigation("Products");
+                    b.Navigation("Images");
                 });
 #pragma warning restore 612, 618
         }

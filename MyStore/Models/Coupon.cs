@@ -4,8 +4,7 @@ namespace MyStore.Models
 {
     public class Coupon : IBaseEntity
     {
-        [Key]
-        public int CouponID { get; set; }
+        public int Id { get; set; }
         public string Note { get; set; }
         public DateTime DateFounded { get; set; }
         public DateTime ConfirmDate { get; set; }

@@ -4,8 +4,7 @@ namespace MyStore.Models
 {
     public class Supplier : IBaseEntity
     {
-        [Key]
-        public int SupplierID { get; set; }
+        public int Id { get; set; }
         public string Name { get; set; }
         public string Represent { get; set; }
         public string Email { get; set; }

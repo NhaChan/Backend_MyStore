@@ -12,6 +12,7 @@ namespace MyStore.Data
         public DbSet<Category> Caterories { get; set; }
         public DbSet<Product> Products { get; set; }
         public DbSet<User> Users { get; set; }
+        public DbSet<Image> Images { get; set; }
 
 
         private void UpdateTimestamps()
