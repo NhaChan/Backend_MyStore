@@ -8,6 +8,7 @@
         Task AddAsync(IEnumerable<T> entities);
         Task UpdateAsync(T entity);
         Task DeleteAsync(T entity);
+        Task DeleteAsync(IEnumerable<T> entities);
         Task DeleteAsync(params object?[]? keyValues);
         Task<int> CountAsync();
     }

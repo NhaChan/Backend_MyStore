@@ -32,7 +32,7 @@ namespace MyStore.Repository.ProductRepository
                 .ToListAsync();
         }
 
-        public async Task<Product?> GetProductAsync(int id)
+        public async Task<Product?> GetProductByIdAsync(int id)
         {
             return await _dbContext.Products
                 .Include(e => e.Brand)

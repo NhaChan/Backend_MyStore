@@ -30,6 +30,12 @@ namespace MyStore.Repository.CommonRepository
             await _context.SaveChangesAsync();
         }
 
+        public virtual async Task DeleteAsync(IEnumerable<T> entities)
+        {
+            _context.RemoveRange(entities);
+            await _context.SaveChangesAsync();
+        }
+
         public virtual async Task DeleteAsync(params object?[]? keyValues)
         {
             var entity = await _context.FindAsync<T>(keyValues);

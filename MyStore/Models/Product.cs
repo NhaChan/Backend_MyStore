@@ -1,7 +1,4 @@
-﻿using System.Collections.ObjectModel;
-using System.ComponentModel.DataAnnotations;
-
-namespace MyStore.Models
+﻿namespace MyStore.Models
 {
     public class Product : IBaseEntity
     {
