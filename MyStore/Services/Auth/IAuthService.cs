@@ -14,5 +14,6 @@ namespace MyStore.Services.Auth
         Task<bool> SendPasswordResetTokenAsync(string email);
         bool VerifyResetToken(string email, string token);
         Task<bool> ResetPasswordAsync(string email, string token, string newPassword);
+        Task<bool> SendTokenAsync(string email);
     }
 }

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using MyStore.Data;
 using MyStore.Request;
@@ -17,6 +18,7 @@ namespace MyStore.Controllers
             _userService = userService;
         }
         [HttpGet]
+        //[Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetAllUser([FromQuery] PageRequest request)
         {
             try

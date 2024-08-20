@@ -67,7 +67,7 @@ namespace MyStore.Controllers
         }
 
 
-        [HttpPost("send-code")]
+        [HttpPost("send-code-resetpassword")]
         public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest request)
         {
             var result = await _authService.SendPasswordResetTokenAsync(request.Email);
@@ -100,6 +100,18 @@ namespace MyStore.Controllers
             }
 
             return Ok("Password has been reset.");
+        }
+
+        [HttpPost("send-code-register")]
+        public async Task<IActionResult> CreateToken([FromBody] ResetPasswordRequest request)
+        {
+            var result = await _authService.SendTokenAsync(request.Email);
+            if (!result)
+            {
+                return BadRequest("Failed to reset password.");
+            }
+
+            return Ok("Reset token sent.");
         }
 
     }

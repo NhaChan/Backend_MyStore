@@ -110,7 +110,9 @@ namespace MyStore.Services.Auth
                 var user = await _userManager.FindByNameAsync(request.Username);
                 if (user != null)
                 {
-                    var access_token = await CreateJWT(user, DateTime.UtcNow.AddMinutes(5));
+                    var roles = await _userManager.GetRolesAsync(user);
+
+                    var access_token = await CreateJWT(user, DateTime.UtcNow.AddMinutes(6));
 
                     var provider = "MyStore";
                     var name = "Refresh_Token";
@@ -124,6 +126,10 @@ namespace MyStore.Services.Auth
                         Access_token = access_token,
                         Refresh_token = refresh_token,
                         Name = user.FullName,
+                        Roles = roles,
+                        Email = user.Email ?? "",
+                        PhoneNumber = user.PhoneNumber,
+
                     };
                 }
                 return null;
@@ -177,6 +183,17 @@ namespace MyStore.Services.Auth
                 return false;
             }
 
+            var token = new Random().Next(100000, 999999).ToString();
+            _cachingService.Set(email, token, TimeSpan.FromMinutes(5));
+
+            var message = $"Your password reset code is: {token}";
+            await _emailSender.SendEmailAsync(email, "Reset password", message);
+
+            return true;
+        }
+
+        public async Task<bool> SendTokenAsync(string email)
+        {
             var token = new Random().Next(100000, 999999).ToString();
             _cachingService.Set(email, token, TimeSpan.FromMinutes(5));
 
