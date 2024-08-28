@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using MyStore.Request;
 using MyStore.Services.Categories;
@@ -14,6 +15,7 @@ namespace MyStore.Controllers
         public CategoryController(ICategoryService categoryService) => _categoryService = categoryService;
 
         [HttpGet]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Get()
         {
             try
@@ -28,6 +30,7 @@ namespace MyStore.Controllers
         }
 
         [HttpPost("create")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Creat([FromBody] NameRequest request)
         {
             try
@@ -42,6 +45,7 @@ namespace MyStore.Controllers
         }
 
         [HttpPut("update/{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Update(int id, [FromBody] NameRequest request)
         {
             try
@@ -60,6 +64,7 @@ namespace MyStore.Controllers
         }
 
         [HttpDelete("delete/{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int id)
         {
             try

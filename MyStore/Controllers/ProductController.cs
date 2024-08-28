@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using MyStore.Request;
 using MyStore.Services.Products;
@@ -14,6 +15,7 @@ namespace MyStore.Controllers
         public ProductController(IProductService productService) => _productService = productService;
 
         [HttpGet]
+        //[Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetAll([FromQuery] PageRequest request)
         {
             try
@@ -43,6 +45,7 @@ namespace MyStore.Controllers
         }
 
         [HttpPost("create")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Create([FromForm] ProductRequest request, [FromForm] IFormCollection form)
         {
             try
@@ -57,6 +60,7 @@ namespace MyStore.Controllers
         }
 
         [HttpPut("update/{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Update(int id, [FromForm] ProductRequest request, [FromForm] IFormCollection form)
         {
             try
@@ -76,6 +80,7 @@ namespace MyStore.Controllers
         }
 
         [HttpDelete("delete/{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int id)
         {
             try

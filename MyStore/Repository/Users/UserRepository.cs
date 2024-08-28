@@ -36,7 +36,7 @@ namespace MyStore.Repository.Users
                 .ToListAsync();
         }
 
-        public async Task<IEnumerable<User>> GetAllUserAsync(int page, int pageSize, string? search)
+        public async Task<IEnumerable<User>> GetAllUserAsync(int page, int pageSize, string search)
         {
             return await _context.Users
                 .Where(e => e.Id.ToString().Contains(search)

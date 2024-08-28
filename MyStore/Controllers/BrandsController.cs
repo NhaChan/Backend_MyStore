@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using MyStore.Models;
 using MyStore.Request;
 using MyStore.Services.Brands;
@@ -16,7 +17,7 @@ namespace MyStore.Controllers
         }
 
         [HttpGet]
-        //[Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetAllBrand()
         {
             try
@@ -44,7 +45,7 @@ namespace MyStore.Controllers
         //}
 
         [HttpPost("create")]
-        //[Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult> CreateBrand([FromForm] NameRequest request, [FromForm] IFormCollection files)
         {
             try
@@ -60,12 +61,12 @@ namespace MyStore.Controllers
         }
 
         [HttpPut("update/{id}")]
-        //[Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult> UpdateBrand(int id, [FromForm] NameRequest request, [FromForm] IFormCollection files)
         {
             try
             {
-                var image = files.Files.First();
+                var image = files.Files.FirstOrDefault();
                 var brand = await _brandService.UpdateBrandAsync(id, request.Name, image);
                 return Ok(brand);
             }   
@@ -79,6 +80,7 @@ namespace MyStore.Controllers
             }
         }
         [HttpDelete("delete/{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteBrand(int id)
         {
             try
