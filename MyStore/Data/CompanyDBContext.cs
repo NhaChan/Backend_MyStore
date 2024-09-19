@@ -5,7 +5,7 @@ using MyStore.Models;
 
 namespace MyStore.Data
 {
-    public class CompanyDBContext : IdentityDbContext<User, IdentityRole<int>, int>
+    public class CompanyDBContext : IdentityDbContext<User>
     {
         public CompanyDBContext(DbContextOptions<CompanyDBContext> options) : base(options) { }
         public DbSet<Brand> Brands { get; set; }
@@ -13,6 +13,12 @@ namespace MyStore.Data
         public DbSet<Product> Products { get; set; }
         public DbSet<User> Users { get; set; }
         public DbSet<Image> Images { get; set; }
+        public DbSet<CartItem> CartItems { get; set; }
+        public DbSet<Order> Orders { get; set; }
+        public DbSet<OrderDetail> OrderDetails { get; set; }
+        public DbSet<PaymentMethod> PaymentMethods { get; set; }
+        public DbSet<DeliveryStatus> DeliveryStatuses { get; set; }
+        public DbSet<Address> Address { get; set; }
 
 
         private void UpdateTimestamps()

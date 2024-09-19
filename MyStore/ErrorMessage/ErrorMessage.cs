@@ -4,6 +4,7 @@
     {
         public const string NOT_FOUND = "Not found";
         public const string NOT_FOUND_USER = "Không tìm thấy người dùng";
-        public static string PASSWORD_ERROR = "Tên hoặc tài khoản không chính xác";
+        public const string PASSWORD_ERROR = "Tên hoặc tài khoản không chính xác";
+        public const string INVALID = "Giá trị không hợp lệ.";
     }
 }

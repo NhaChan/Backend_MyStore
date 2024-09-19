@@ -1,0 +1,13 @@
+From: =?utf-8?b?TcOjIHjDoWMgbmjhuq1uIMSRxINuZyBrw70gdMOgaSBraG/huqNu?= MyStore
+	<lethinhachan18@gmail.com>
+Date: Fri, 30 Aug 2024 15:01:24 +0700
+Subject: Reset password
+Message-Id: <65HAL3UXYNU4.DQ60KE04X3HX2@nhachan>
+Sender: =?utf-8?b?TcOjIHjDoWMgbmjhuq1uIMSRxINuZyBrw70gdMOgaSBraG/huqNu?= MyStore
+	<lethinhachan18@gmail.com>
+To: lethinhachan18@gmail.com
+MIME-Version: 1.0
+Content-Type: text/html; charset=utf-8
+
+Your password reset code is: 334527
+An established connection was aborted by the software in your host machine.

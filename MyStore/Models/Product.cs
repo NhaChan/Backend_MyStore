@@ -1,4 +1,6 @@
-﻿namespace MyStore.Models
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace MyStore.Models
 {
     public class Product : IBaseEntity
     {
@@ -7,7 +9,10 @@
         public double Price { get; set; }
         public string? Description { get; set; }
         public double Discount { get; set; }
-        public int Quanlity { get; set; }
+        public int Quantity { get; set; }
+        public bool Enable { get; set; }
+        [Range(0, int.MaxValue)]
+        public int Sold { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
 

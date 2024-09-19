@@ -1,4 +1,6 @@
-﻿namespace MyStore.Repository.CommonRepository
+﻿using System.Linq.Expressions;
+
+namespace MyStore.Repository.CommonRepository
 {
     public interface ICommonRepository<T> where T : class
     {
@@ -11,5 +13,9 @@
         Task DeleteAsync(IEnumerable<T> entities);
         Task DeleteAsync(params object?[]? keyValues);
         Task<int> CountAsync();
+        Task<int> CountAsync(Expression<Func<T, bool>> expression);
+        Task<IEnumerable<T>> GetAsync(Expression<Func<T, bool>> expression);
+        Task<IEnumerable<T>> GetPagedAsync<TKey>(int page, int pageSize, Expression<Func<T, bool>>? expression, Expression<Func<T, TKey>> orderBy);
+        Task<IEnumerable<T>> GetPageOrderByDescendingAsync<TKey>(int page, int pageSize, Expression<Func<T, bool>>? expression, Expression<Func<T, TKey>> orderByDesc);
     }
 }

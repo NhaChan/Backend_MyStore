@@ -197,7 +197,7 @@ namespace MyStore.Services.Auth
                 }
                 throw new Exception(ErrorMessage.NOT_FOUND_USER);
             }
-            throw new ArgumentException(ErrorMessage.PASSWORD_ERROR);
+            throw new Exception(ErrorMessage.PASSWORD_ERROR);
         }
 
         public async Task<IdentityResult> Register(RegisterRequest request)
@@ -258,7 +258,7 @@ namespace MyStore.Services.Auth
             var token = new Random().Next(100000, 999999).ToString();
             _cachingService.Set(email, token, TimeSpan.FromMinutes(5));
 
-            var message = $"Your password reset code is: {token}";
+            var message = $"Mã xác nhận tạo tài khoản ZuiZui shop: {token}";
             await _emailSender.SendEmailAsync(email, "Reset password", message);
 
             return true;

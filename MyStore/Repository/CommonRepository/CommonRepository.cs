@@ -1,6 +1,9 @@
 ﻿
 using Microsoft.EntityFrameworkCore;
 using MyStore.Data;
+using MyStore.Services;
+using System.Linq.Expressions;
+using System.Reflection.Metadata.Ecma335;
 
 namespace MyStore.Repository.CommonRepository
 {
@@ -23,6 +26,11 @@ namespace MyStore.Repository.CommonRepository
         }
 
         public async Task<int> CountAsync() => await _context.Set<T>().CountAsync();
+
+        public async Task<int> CountAsync(Expression<Func<T, bool>> expression)
+        {
+            return await _context.Set<T>().Where(expression).CountAsync();
+        }
 
         public virtual async Task DeleteAsync(T entity)
         {
@@ -52,11 +60,35 @@ namespace MyStore.Repository.CommonRepository
             return await _context.FindAsync<T>(keyValues);
         }
 
-        public async Task<IEnumerable<T>> GetAllAsync()
+        public virtual async Task<IEnumerable<T>> GetAllAsync()
         {
             return await _context.Set<T>().ToListAsync();
         }
-            
+
+        public virtual async Task<IEnumerable<T>> GetAsync(Expression<Func<T, bool>> expression)
+        {
+            return await _context.Set<T>().Where(expression).ToListAsync();
+        }
+
+        public virtual async Task<IEnumerable<T>> GetPagedAsync(int page, int pageSize)
+        {
+            return await _context.Set<T>().Paginate(page, pageSize).ToListAsync();
+        }
+
+        public virtual async Task<IEnumerable<T>> GetPagedAsync<TKey>(int page, int pageSize, Expression<Func<T, bool>>? expression, Expression<Func<T, TKey>> orderBy)
+        {
+            return expression == null
+                ? await _context.Set<T>().OrderBy(orderBy).Paginate(page, pageSize).ToListAsync()
+                : await _context.Set<T>().Where(expression).OrderBy(orderBy).Paginate(page, pageSize).ToListAsync();
+        }
+
+        public virtual async Task<IEnumerable<T>> GetPageOrderByDescendingAsync<TKey>(int page, int pageSize, Expression<Func<T, bool>>? expression, Expression<Func<T, TKey>> orderByDesc)
+        {
+            return expression == null
+                ? await _context.Set<T>().OrderByDescending(orderByDesc).Paginate(page, pageSize).ToArrayAsync()
+                : await _context.Set<T>().Where(expression).OrderByDescending(orderByDesc).Paginate(page, pageSize).ToArrayAsync();
+        }
+
         public async Task UpdateAsync(T entity)
         {
             _context.Update(entity);

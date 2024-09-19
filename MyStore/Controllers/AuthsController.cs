@@ -19,14 +19,21 @@ namespace MyStore.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login(LoginRequest loginRequest)
         {
-            var result = await _authService.Login(loginRequest);
-            if(result != null)
+            try
             {
-                return Ok(result);
+                var result = await _authService.Login(loginRequest);
+                if (result != null)
+                {
+                    return Ok(result);
+                }
+                else
+                {
+                    return Unauthorized("Ten hoac mat khau khong chinh xac");
+                }
             }
-            else
+            catch (Exception ex)
             {
-                return Unauthorized("Ten hoac mat khau khong chinh xac");
+                return StatusCode(500, ex.Message);
             }
         }
 

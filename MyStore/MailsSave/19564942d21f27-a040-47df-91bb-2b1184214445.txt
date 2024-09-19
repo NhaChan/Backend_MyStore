@@ -1,0 +1,16 @@
+From: =?utf-8?b?TcOjIHjDoWMgbmjhuq1uIMSRxINuZyBrw70gdMOgaSBraG/huqNu?= MyStore
+	<lethinhachan18@gmail.com>
+Date: Fri, 30 Aug 2024 15:02:26 +0700
+Subject: Reset password
+Message-Id: <EEE5RDUXYNU4.LCW6TFO7XG2E@nhachan>
+Sender: =?utf-8?b?TcOjIHjDoWMgbmjhuq1uIMSRxINuZyBrw70gdMOgaSBraG/huqNu?= MyStore
+	<lethinhachan18@gmail.com>
+To: 195649
+MIME-Version: 1.0
+Content-Type: text/html; charset=utf-8
+
+Your password reset code is: 508315
+5.1.3 The recipient address <195649> is not a valid RFC 5321 address. For
+5.1.3 more information, go to
+5.1.3  https://support.google.com/a/answer/3221692 and review RFC 5321
+5.1.3 specifications. d2e1a72fcca58-715e56d8843sm2226865b3a.160 - gsmtp

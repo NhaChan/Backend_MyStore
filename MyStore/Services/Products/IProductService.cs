@@ -11,6 +11,8 @@ namespace MyStore.Services.Products
         Task<ProductDTO> CreatedProductAsync(ProductRequest request, IFormFileCollection images);
         Task<ProductDetailResponse> GetProductById(int id);
         Task<ProductDTO> UpdateProduct(int id, ProductRequest productRequest, IFormFileCollection images);
+        Task<bool> UpdateProductEnableAsync(int id, UpdateEnableRequest request);
         Task DeleteProductAsync(int id);
+        Task<PagedResponse<ProductDTO>> GetFilterProductsAsync(Filters filters);
     }
 }

@@ -17,7 +17,7 @@ namespace MyStore.Controllers
         }
 
         [HttpGet]
-        [Authorize(Roles = "Admin")]
+        //[Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetAllBrand()
         {
             try

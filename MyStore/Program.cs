@@ -19,6 +19,9 @@ using MyStore.Repository.BrandRepository;
 using MyStore.Services.Products;
 using MyStore.Repository.ProductRepository;
 using MyStore.Repository.ImageRepository;
+using MyStore.Repository.CartItemRepository;
+using MyStore.Services.Carts;
+using MyStore.DataSeeding;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -31,11 +34,12 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddDbContext<CompanyDBContext>(opt =>
 {
-    opt.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+    opt.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"),
+        m => m.MigrationsAssembly("MyStore"));
 });
-builder.Services.AddIdentity<User, IdentityRole<int>>()
+builder.Services.AddIdentity<User, IdentityRole>()
     .AddEntityFrameworkStores<CompanyDBContext>()
-    .AddTokenProvider("MyStore", typeof(DataProtectorTokenProvider<User>));
+    .AddDefaultTokenProviders();
 
 builder.Services.AddMemoryCache();
 builder.Services.AddSingleton<ICachingService, CachingService>();
@@ -47,12 +51,14 @@ builder.Services.AddScoped<IBrandService, BrandService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IProductService, ProductService>();
+builder.Services.AddScoped<ICartItemService, CartItemService>();
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<IBrandRepository, BrandRepository>();
 builder.Services.AddScoped<IImageRepository, ImageRepository>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
+builder.Services.AddScoped<ICartItemRepository, CartItemRepository>();
 
 builder.Services.Configure<MailSettings>(builder.Configuration.GetSection("MailSettings"));
 builder.Services.AddSingleton<ISendMailService, SendMailService>();
@@ -89,6 +95,8 @@ builder.Services.AddCors(opt =>
 
 
 var app = builder.Build();
+
+DataSeeding.Initialize(app.Services).Wait();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

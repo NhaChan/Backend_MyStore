@@ -15,7 +15,7 @@ namespace MyStore.Controllers
         public CategoryController(ICategoryService categoryService) => _categoryService = categoryService;
 
         [HttpGet]
-        [Authorize(Roles = "Admin")]
+        //[Authorize(Roles = "Admin")]
         public async Task<IActionResult> Get()
         {
             try

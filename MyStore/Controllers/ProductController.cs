@@ -44,6 +44,24 @@ namespace MyStore.Controllers
             }
         }
 
+        [HttpGet("filters")]
+        public async Task<IActionResult> GetFilterProducts([FromQuery] Filters filters)
+        {
+            try
+            {
+                var result = await _productService.GetFilterProductsAsync(filters);
+                return Ok(result);
+            }
+            catch (ArgumentException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
+
         [HttpPost("create")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Create([FromForm] ProductRequest request, [FromForm] IFormCollection form)
@@ -72,6 +90,25 @@ namespace MyStore.Controllers
             catch (ArgumentException ex)
             {
                 return NotFound(ex.Message) ;
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
+
+        [HttpPut("updateEnable/{id}")]
+        //[Authorize(Roles = "Admin")]
+        public async Task<IActionResult> UpdateProductEnable(int id, [FromBody] UpdateEnableRequest request)
+        {
+            try
+            {
+                var result = await _productService.UpdateProductEnableAsync(id, request);
+                return Ok(result);
+            }
+            catch (ArgumentException ex)
+            {
+                return NotFound(ex.Message);
             }
             catch (Exception ex)
             {
