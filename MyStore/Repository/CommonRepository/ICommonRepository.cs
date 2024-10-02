@@ -6,6 +6,7 @@ namespace MyStore.Repository.CommonRepository
     {
         Task<IEnumerable<T>> GetAllAsync();
         Task<T?> FindAsync(params object?[]? keyValues);
+        Task<T?> SingleOrDefaultAsync(Expression<Func<T, bool>> expression);
         Task AddAsync(T entity);
         Task AddAsync(IEnumerable<T> entities);
         Task UpdateAsync(T entity);
@@ -15,6 +16,7 @@ namespace MyStore.Repository.CommonRepository
         Task<int> CountAsync();
         Task<int> CountAsync(Expression<Func<T, bool>> expression);
         Task<IEnumerable<T>> GetAsync(Expression<Func<T, bool>> expression);
+        Task<T?> FindAsyncCart(Expression<Func<T, bool>> expression);
         Task<IEnumerable<T>> GetPagedAsync<TKey>(int page, int pageSize, Expression<Func<T, bool>>? expression, Expression<Func<T, TKey>> orderBy);
         Task<IEnumerable<T>> GetPageOrderByDescendingAsync<TKey>(int page, int pageSize, Expression<Func<T, bool>>? expression, Expression<Func<T, TKey>> orderByDesc);
     }

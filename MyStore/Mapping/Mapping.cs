@@ -22,6 +22,7 @@ namespace MyStore.Mapping
 
             CreateMap<ProductRequest, Product>();
             CreateMap<Product, ProductDetailResponse>();
+            CreateMap<AddressDTO, DeliveryAddress>().ReverseMap();
 
         }
     }

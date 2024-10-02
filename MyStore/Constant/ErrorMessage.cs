@@ -1,4 +1,4 @@
-﻿namespace MyStore.ErroMessage
+﻿namespace MyStore.Constant
 {
     public static class ErrorMessage
     {

@@ -10,24 +10,39 @@ namespace MyStore.DataSeeding
     {
         public static async Task Initialize(IServiceProvider serviceProvider)
         {
-            using (var scope = serviceProvider.CreateAsyncScope())
+            using var scope = serviceProvider.CreateAsyncScope();
+            var context = scope.ServiceProvider.GetRequiredService<CompanyDBContext>();
+            
+            if(context != null)
             {
-                var context = scope.ServiceProvider.GetRequiredService<CompanyDBContext>();
-                if (context != null && context.Database.GetPendingMigrations().Any())
+                try
                 {
-                    context.Database.Migrate();
+                    if (context.Database.GetPendingMigrations().Any())
                     {
-                        try
-                        {
-                            await InitialRoles(scope.ServiceProvider, context);
-                        }
-                        catch (Exception)
-                        {
-                            throw;
-                        }
+                        context.Database.Migrate();
                     }
+                    await InitialRoles(scope.ServiceProvider, context);
+                }
+                catch (Exception)
+                {
+                    throw;
                 }
             }
+        }
+        private static async Task InitialRoles(IServiceProvider serviceProvider, CompanyDBContext context)
+        {
+            var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+
+            string[] roles = { "Admin" };
+
+            foreach (string role in roles)
+            {
+                if (!context.Roles.Any(r => r.Name == role))
+                {
+                    await roleManager.CreateAsync(new IdentityRole(role));
+                }
+            }
+            await InitialUsers(serviceProvider, context, roles);
         }
 
         private static async Task InitialUsers(IServiceProvider serviceProvider, CompanyDBContext context, string[] roles)
@@ -53,23 +68,6 @@ namespace MyStore.DataSeeding
                     await userManager.AddToRolesAsync(user, roles);
                 }
             }
-        }
-
-        private static async Task InitialRoles(IServiceProvider serviceProvider, CompanyDBContext context)
-        {
-            var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-
-            string[] roles = { "Admin", "User" };
-
-            foreach (string role in roles)
-            {
-                if(!context.Roles.Any(r => r.Name == role))
-                {
-                    await roleManager.CreateAsync(new IdentityRole(role));
-                }
-            }
-
-            await InitialUsers(serviceProvider, context, roles);
         }
     }
 }

@@ -30,5 +30,12 @@ namespace MyStore.Repository.CartItemRepository
                 .ThenInclude(e => e.Images)
                 .Where(expression).ToListAsync();
         }
+        public async Task<CartItem?> SingleOrDefaultAsync(Expression<Func<CartItem, bool>> expression)
+        {
+            return await _dbContext.CartItems
+                .Include(e => e.Product)
+                .ThenInclude(e => e.Images)
+                .AsSingleQuery().SingleOrDefaultAsync(expression);
+        }
     }
 }

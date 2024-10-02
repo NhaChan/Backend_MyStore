@@ -59,6 +59,10 @@ namespace MyStore.Repository.CommonRepository
         {
             return await _context.FindAsync<T>(keyValues);
         }
+        public async Task<T?> FindAsyncCart(Expression<Func<T, bool>> expression)
+        {
+            return await _context.Set<T>().FirstOrDefaultAsync(expression);
+        }
 
         public virtual async Task<IEnumerable<T>> GetAllAsync()
         {
@@ -88,6 +92,10 @@ namespace MyStore.Repository.CommonRepository
                 ? await _context.Set<T>().OrderByDescending(orderByDesc).Paginate(page, pageSize).ToArrayAsync()
                 : await _context.Set<T>().Where(expression).OrderByDescending(orderByDesc).Paginate(page, pageSize).ToArrayAsync();
         }
+
+        public virtual async Task<T?> SingleOrDefaultAsync(Expression<Func<T, bool>> expression)
+            => await _context.Set<T>().SingleOrDefaultAsync(expression);
+
 
         public async Task UpdateAsync(T entity)
         {

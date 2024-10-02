@@ -155,35 +155,6 @@ namespace MyStore.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("MyStore.Models.Address", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("Address");
-                });
-
             modelBuilder.Entity("MyStore.Models.Brand", b =>
                 {
                     b.Property<int>("Id")
@@ -213,14 +184,14 @@ namespace MyStore.Migrations
 
             modelBuilder.Entity("MyStore.Models.CartItem", b =>
                 {
-                    b.Property<string>("UserId")
+                    b.Property<string>("Id")
                         .HasColumnType("nvarchar(450)");
-
-                    b.Property<int>("ProductId")
-                        .HasColumnType("int");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int");
 
                     b.Property<int>("Quantity")
                         .HasColumnType("int");
@@ -228,9 +199,15 @@ namespace MyStore.Migrations
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
 
-                    b.HasKey("UserId", "ProductId");
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
 
                     b.HasIndex("ProductId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("CartItems");
                 });
@@ -256,6 +233,50 @@ namespace MyStore.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Caterories");
+                });
+
+            modelBuilder.Entity("MyStore.Models.DeliveryAddress", b =>
+                {
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Detail")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("District_id")
+                        .HasColumnType("int");
+
+                    b.Property<string>("District_name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PhoneNumber")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("Province_id")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Province_name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("Ward_id")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Ward_name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("UserId");
+
+                    b.ToTable("DeliveryAddress");
                 });
 
             modelBuilder.Entity("MyStore.Models.DeliveryStatus", b =>
@@ -560,17 +581,6 @@ namespace MyStore.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("MyStore.Models.Address", b =>
-                {
-                    b.HasOne("MyStore.Models.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("MyStore.Models.CartItem", b =>
                 {
                     b.HasOne("MyStore.Models.Product", "Product")
@@ -586,6 +596,17 @@ namespace MyStore.Migrations
                         .IsRequired();
 
                     b.Navigation("Product");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("MyStore.Models.DeliveryAddress", b =>
+                {
+                    b.HasOne("MyStore.Models.User", "User")
+                        .WithOne("DeliveryAddress")
+                        .HasForeignKey("MyStore.Models.DeliveryAddress", "UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("User");
                 });
@@ -682,6 +703,12 @@ namespace MyStore.Migrations
             modelBuilder.Entity("MyStore.Models.Product", b =>
                 {
                     b.Navigation("Images");
+                });
+
+            modelBuilder.Entity("MyStore.Models.User", b =>
+                {
+                    b.Navigation("DeliveryAddress")
+                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }

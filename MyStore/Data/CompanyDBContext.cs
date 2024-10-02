@@ -11,14 +11,13 @@ namespace MyStore.Data
         public DbSet<Brand> Brands { get; set; }
         public DbSet<Category> Caterories { get; set; }
         public DbSet<Product> Products { get; set; }
-        public DbSet<User> Users { get; set; }
         public DbSet<Image> Images { get; set; }
         public DbSet<CartItem> CartItems { get; set; }
         public DbSet<Order> Orders { get; set; }
         public DbSet<OrderDetail> OrderDetails { get; set; }
         public DbSet<PaymentMethod> PaymentMethods { get; set; }
         public DbSet<DeliveryStatus> DeliveryStatuses { get; set; }
-        public DbSet<Address> Address { get; set; }
+        public DbSet<DeliveryAddress> DeliveryAddress { get; set; }
 
 
         private void UpdateTimestamps()

@@ -20,7 +20,7 @@ namespace MyStore.Controllers
         }
 
         [HttpPost("create")]
-        public async Task<IActionResult> Create(CartItemRequest request)
+        public async Task<IActionResult> Create([FromBody] CartItemRequest request)
         {
             try
             {
@@ -58,7 +58,7 @@ namespace MyStore.Controllers
         }
 
         [HttpDelete("delete")]
-        public async Task<IActionResult> Delete([FromQuery]IEnumerable<int> productId)
+        public async Task<IActionResult> Delete([FromQuery] IEnumerable<int> productId)
         {
             try
             {
@@ -68,6 +68,29 @@ namespace MyStore.Controllers
                     return Unauthorized();
                 }
                 await _cartItemService.DeleteCartAsync(userId, productId);
+                return NoContent();
+            }
+            catch (ArgumentException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
+
+        [HttpPut("update/{id}")]
+        public async Task<IActionResult> Update(string id, [FromQuery] UpdateCartRequest request)
+        {
+            try
+            {
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (userId == null)
+                {
+                    return Unauthorized();
+                }
+                await _cartItemService.UpdateCartItem(id, userId, request);
                 return NoContent();
             }
             catch (ArgumentException ex)

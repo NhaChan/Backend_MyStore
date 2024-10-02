@@ -12,12 +12,14 @@ namespace MyStore.Services.Users
         private readonly UserManager<User> _userManager;
         private readonly IUserRepository _userRepository;
         private readonly IMapper _mapper;
+        private readonly IDeliveryAdressRepository _deliveryAdressRepository;
 
-        public UserService(UserManager<User> userManager, IUserRepository userRepository, IMapper mapper)
+        public UserService(UserManager<User> userManager, IUserRepository userRepository, IMapper mapper, IDeliveryAdressRepository deliveryAdressRepository)
         {
             _userManager = userManager;
             _userRepository = userRepository;
             _mapper = mapper;
+            _deliveryAdressRepository = deliveryAdressRepository;
         }
         public async Task<PagedResponse<UserResponse>> GetAllUserAsync(int page, int pageSize, string? keySearch)
         {
@@ -58,6 +60,21 @@ namespace MyStore.Services.Users
                 Page = page,
                 PageSize = pageSize
             };
+        }
+
+        public async Task<AddressDTO?> GetUserAddress(string userId)
+        {
+            var delivery = await _deliveryAdressRepository.SingleOrDefaultAsync(e => e.User.Id == userId);
+            if(delivery != null)
+            {
+                return _mapper.Map<AddressDTO>(delivery);
+            }
+            return null;
+        }
+
+        public Task<AddressDTO?> UpdateUserAddress(string userId, AddressDTO address)
+        {
+            throw new NotImplementedException();
         }
     }
 }

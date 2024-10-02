@@ -8,5 +8,7 @@ namespace MyStore.Models
         public string? FullName { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
+
+        public DeliveryAddress? DeliveryAddress { get; set; }
     }
 }

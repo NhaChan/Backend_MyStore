@@ -34,12 +34,12 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddDbContext<CompanyDBContext>(opt =>
 {
-    opt.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"),
-        m => m.MigrationsAssembly("MyStore"));
+    opt.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
+
 builder.Services.AddIdentity<User, IdentityRole>()
     .AddEntityFrameworkStores<CompanyDBContext>()
-    .AddDefaultTokenProviders();
+    .AddTokenProvider("MyStore", typeof(DataProtectorTokenProvider<User>));
 
 builder.Services.AddMemoryCache();
 builder.Services.AddSingleton<ICachingService, CachingService>();
@@ -59,6 +59,7 @@ builder.Services.AddScoped<IBrandRepository, BrandRepository>();
 builder.Services.AddScoped<IImageRepository, ImageRepository>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<ICartItemRepository, CartItemRepository>();
+builder.Services.AddScoped<IDeliveryAdressRepository, DeliveryAddressRepository>();
 
 builder.Services.Configure<MailSettings>(builder.Configuration.GetSection("MailSettings"));
 builder.Services.AddSingleton<ISendMailService, SendMailService>();
