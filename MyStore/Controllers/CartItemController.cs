@@ -81,7 +81,7 @@ namespace MyStore.Controllers
         }
 
         [HttpPut("update/{id}")]
-        public async Task<IActionResult> Update(string id, [FromQuery] UpdateCartRequest request)
+        public async Task<IActionResult> Update(string id, [FromBody] UpdateCartRequest request)
         {
             try
             {

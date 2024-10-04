@@ -4,6 +4,7 @@ using MyStore.Response;
 using MyStore.Models;
 using AutoMapper;
 using MyStore.DTO;
+using MyStore.Constant;
 
 namespace MyStore.Services.Users
 {
@@ -72,9 +73,50 @@ namespace MyStore.Services.Users
             return null;
         }
 
-        public Task<AddressDTO?> UpdateUserAddress(string userId, AddressDTO address)
+        public async Task<AddressDTO?> UpdateUserAddress(string userId, AddressDTO address)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var delivery = await _deliveryAdressRepository.SingleOrDefaultAsync(e => e.UserId == userId);
+                if (delivery != null)
+                {
+                    delivery.Name = address.Name;
+                    delivery.PhoneNumber = address.PhoneNumber;
+                    delivery.Detail = address.Detail;
+                    delivery.Province_id = address.Province_id;
+                    delivery.Province_name = address.Province_name;
+                    delivery.District_id = address.District_id;
+                    delivery.District_name = address.District_name;
+                    delivery.Ward_id = address.Ward_id;
+                    delivery.Ward_name = address.Ward_name;
+
+                    await _deliveryAdressRepository.UpdateAsync(delivery);
+                    
+                }
+                else
+                {
+                    delivery = new DeliveryAddress
+                    {
+                        UserId = userId,
+                        Name = address.Name,
+                        PhoneNumber = address.PhoneNumber,
+                        Detail = address.Detail,
+                        Province_id = address.Province_id,
+                        Province_name = address.Province_name,
+                        District_id = address.District_id,
+                        District_name = address.District_name,
+                        Ward_id = address.Ward_id,
+                        Ward_name = address.Ward_name
+                    };
+
+                    await _deliveryAdressRepository.AddAsync(delivery);
+                }
+                return _mapper.Map<AddressDTO?>(delivery);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
         }
     }
 }

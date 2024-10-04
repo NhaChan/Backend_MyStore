@@ -81,7 +81,7 @@ namespace MyStore.Services.Carts
             }
         }
 
-        public async Task<CartItemResponse> UpdateCartItem(string userId, string cartId, UpdateCartRequest request)
+        public async Task<CartItemResponse> UpdateCartItem(string cartId, string userId, UpdateCartRequest request)
         {
             try
             {

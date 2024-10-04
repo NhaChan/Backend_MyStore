@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using MyStore.Data;
+using MyStore.DTO;
 using MyStore.Request;
 using MyStore.Services.Users;
 using System.Security.Claims;
@@ -32,7 +33,7 @@ namespace MyStore.Controllers
             }
         }
 
-        [HttpGet("address")]
+        [HttpGet("get-address")]
         [Authorize]
         public async Task<IActionResult> GetAddress()
         {
@@ -46,6 +47,30 @@ namespace MyStore.Controllers
                 var address = await _userService.GetUserAddress(userId);
                 return Ok(address);
             }
+            catch (ArgumentException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
+
+        [HttpPut("update-address")]
+        [Authorize]
+        public async Task<IActionResult> Update([FromBody] AddressDTO address)
+        {
+            try
+            {
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if(userId == null)
+                {
+                    return Unauthorized();
+                }
+                var result = await _userService.UpdateUserAddress(userId, address);
+                return Ok(result);
+            } 
             catch (ArgumentException ex)
             {
                 return NotFound(ex.Message);

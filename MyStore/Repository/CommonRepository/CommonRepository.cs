@@ -96,10 +96,18 @@ namespace MyStore.Repository.CommonRepository
         public virtual async Task<T?> SingleOrDefaultAsync(Expression<Func<T, bool>> expression)
             => await _context.Set<T>().SingleOrDefaultAsync(expression);
 
+        public virtual async Task<T?> SingleAsync(Expression<Func<T, bool>> expression)
+            => await _context.Set<T>().SingleAsync(expression);
 
         public async Task UpdateAsync(T entity)
         {
             _context.Update(entity);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task UpdateAsync(IEnumerable<T> entities)
+        {
+            _context.UpdateRange(entities);
             await _context.SaveChangesAsync();
         }
     }
