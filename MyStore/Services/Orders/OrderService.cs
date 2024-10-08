@@ -1,12 +1,15 @@
 ﻿using AutoMapper;
 using MyStore.Constant;
+using MyStore.DTO;
 using MyStore.Enumerations;
 using MyStore.Models;
 using MyStore.Repository.CartItemRepository;
 using MyStore.Repository.OrderRepository;
 using MyStore.Repository.ProductRepository;
 using MyStore.Request;
+using MyStore.Response;
 using MyStore.Services.Payments;
+using System.Linq.Expressions;
 
 namespace MyStore.Services.Orders
 {
@@ -104,6 +107,57 @@ namespace MyStore.Services.Orders
             {
                 throw new Exception(ex.Message);
             }
+        }
+
+        public async Task<PagedResponse<OrderDTO>> GetOrderByUserId(string userId, PageRequest page)
+        {
+            var orders = await _orderRepository.GetPageOrderByDescendingAsync(page.page, page.pageSize, e => e.UserId == userId, x => x.CreatedAt);
+            var total = await _orderRepository.CountAsync();
+
+            var items = _mapper.Map<IEnumerable<OrderDTO>> (orders);
+
+            return new PagedResponse<OrderDTO>
+            {
+                Items = items,
+                TotalItems = total,
+                Page = page.page,
+                PageSize = page.pageSize
+            };
+        }
+
+        public async Task<PagedResponse<OrderDTO>> GetAllOrder(int page, int pageSize, string? search)
+        {
+            int totalOrder;
+            IEnumerable<Order> orders;
+
+            if (string.IsNullOrEmpty(search))
+            {
+                totalOrder = await _orderRepository.CountAsync();
+                orders = await _orderRepository.GetPageOrderByDescendingAsync(page, pageSize, null, x => x.CreatedAt);
+            }
+            else
+            {
+                Expression<Func<Order, bool>> expression =
+                    e => e.Id.ToString().Contains(search)
+                    || (e.OrderStatus != null && e.OrderStatus.Value.ToString().Contains(search));
+
+                totalOrder = await _orderRepository.CountAsync(expression);
+                orders = await _orderRepository.GetPageOrderByDescendingAsync(page, pageSize, expression, e => e.CreatedAt);
+            }
+
+            var items = _mapper.Map<IEnumerable<OrderDTO>>(orders);
+            return new PagedResponse<OrderDTO>
+            {
+                Items = items,
+                Page = page,
+                PageSize = pageSize,
+                TotalItems = totalOrder,
+            };
+        }
+
+        public Task<OrderDetailsResponse> GetOrderDetails(int id)
+        {
+            throw new NotImplementedException();
         }
     }
 }
