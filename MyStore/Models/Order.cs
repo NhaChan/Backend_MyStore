@@ -19,12 +19,14 @@ namespace MyStore.Models
 
         public string UserId { get; set; }
         public User User { get; set; }
+
         public int? PaymentMethodId { get; set; }
+        public string? PaymentMethodName { get; set; }
         public PaymentMethod? PaymentMethod { get; set; }
         //public string OrderStatusName { get; set; } = DeliveryStatusEnum.Proccessing.ToString();
         public DeliveryStatusEnum? OrderStatus { get; set; } = DeliveryStatusEnum.Proccessing;
 
-        public ICollection<OrderDetail> OrderDetails { get; set; } = new HashSet<OrderDetail>();
+        public ICollection<OrderDetail> OrderDetails { get; } = new HashSet<OrderDetail>();
 
     }
 }

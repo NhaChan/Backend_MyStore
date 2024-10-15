@@ -12,7 +12,10 @@ namespace MyStore.Repository.OrderRepository
 
         public override async Task<IEnumerable<OrderDetail>> GetAsync(Expression<Func<OrderDetail, bool>> expression)
         {
-            return await _context.OrderDetails.Include(e => e.Product).Where(expression).ToListAsync();
+            return await _context.OrderDetails
+                .Where(expression)
+                .Include(e => e.Product)
+                .ToListAsync();
         }
     }
 }

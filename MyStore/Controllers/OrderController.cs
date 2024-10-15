@@ -32,7 +32,7 @@ namespace MyStore.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, ex.InnerException.Message);
             }
         }
 
@@ -62,6 +62,40 @@ namespace MyStore.Controllers
         {
             var result = await _orderService.GetAllOrder(request.page, request.pageSize, request.search);
             return Ok(result);
+        }
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetOrderDetail(long id)
+        {
+            try
+            {
+                var role = User.FindAll(ClaimTypes.Role).Select(e => e.Value);
+                var isAdmin = role.Contains("Admin");
+
+                if(isAdmin)
+                {
+                    var orderDetail = await _orderService.GetOrderDetails(id);
+                    return Ok(orderDetail);
+                }
+                else
+                {
+                    var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                    if(userId == null)
+                    {
+                        return Unauthorized();
+                    }
+                    var orderDetailUser = await _orderService.GetOrderDetailUser(id, userId);
+                    return Ok(orderDetailUser);
+                }
+            }
+            catch (InvalidOperationException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch(Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
         }
         
     }

@@ -9,6 +9,7 @@ using MyStore.Repository.ProductRepository;
 using MyStore.Request;
 using MyStore.Response;
 using MyStore.Services.Payments;
+using Net.payOS;
 using System.Linq.Expressions;
 
 namespace MyStore.Services.Orders
@@ -22,10 +23,11 @@ namespace MyStore.Services.Orders
         private readonly IOrderDetailRepository _orderDetailRepository;
         private readonly IMapper _mapper;
         private readonly IPaymentService _paymentService;
+        private readonly PayOS _payOS;
 
         public OrderService(IOrderRepository orderRepository, IProductRepository productRepository, 
             ICartItemRepository cartItemRepository, IPaymentMethodRepository paymentMethodRepository, 
-            IMapper mapper, IPaymentService paymentService, IOrderDetailRepository orderDetailRepository)
+            IMapper mapper, IPaymentService paymentService, IOrderDetailRepository orderDetailRepository, PayOS payOS)
         {
             _orderRepository = orderRepository;
             _productRepository = productRepository;
@@ -34,6 +36,7 @@ namespace MyStore.Services.Orders
             _mapper = mapper;
             _paymentService = paymentService;
             _orderDetailRepository = orderDetailRepository;
+            _payOS = payOS;
         }
 
         private double CalculateShip(double price) => price >= 400000 ? 0 : price >= 200000 ? 20000 : 40000;
@@ -51,10 +54,15 @@ namespace MyStore.Services.Orders
                     Receiver = request.Receiver,
                     Total = request.Total,
                 };
-                var method = await _paymentService.IsActivePaymentMethod(request.PaymentMethodId)
-                    ?? throw new ArgumentException(ErrorMessage.NOT_FOUND);
+                //var method = await _paymentService.IsActivePaymentMethod(request.PaymentMethodId)
+                //    ?? throw new ArgumentException(ErrorMessage.NOT_FOUND);
+
+                var method = await _paymentMethodRepository
+                    .SingleOrDefaultAsync(x => x.Id == request.PaymentMethodId && x.IsActive)
+                    ?? throw new ArgumentException(ErrorMessage.NOT_FOUND + " phương thức thanh toán");
 
                 order.PaymentMethodId = request.PaymentMethodId;
+                order.PaymentMethodName = method.Name;
 
                 await _orderRepository.AddAsync(order);
 
@@ -62,6 +70,7 @@ namespace MyStore.Services.Orders
 
                 var cartItems = await _cartItemRepository.GetAsync(e => e.UserId == userId && request.CartIds.Contains(e.ProductId));
                 var listProductUpdate = new List<Product>();
+                var listDetails = new List<OrderDetail>();
 
                 var details = cartItems.Select(cartItem =>
                 {
@@ -72,6 +81,7 @@ namespace MyStore.Services.Orders
                     cartItem.Product.Sold += cartItem.Quantity;
                     cartItem.Product.Quantity -= cartItem.Quantity;
                     listProductUpdate.Add(cartItem.Product);
+                    var imageUrl = cartItem.Product.Images.FirstOrDefault();
                     return new OrderDetail
                     {
                         OrderId = order.Id,
@@ -80,8 +90,30 @@ namespace MyStore.Services.Orders
                         Quantity = cartItem.Quantity,
                         OriginPrice = cartItem.Product.Price,
                         Price = price,
+                        ImageUrl = imageUrl != null ? imageUrl.ImageUrl : null,
                     };
                 }).ToList();
+
+                //foreach (var cartItem in cartItems)
+                //{
+                //    double price = cartItem.Product.Price - (cartItem.Product.Price * (cartItem.Product.Discount / 100));
+                //    price *= cartItem.Quantity;
+                //    total += price;
+
+                //    cartItem.Product.Sold += cartItem.Quantity;
+                //    cartItem.Product.Quantity -= cartItem.Quantity;
+                //    listProductUpdate.Add(cartItem.Product);
+                //    listProductUpdate.Add(new OrderDetail
+                //    {
+                //        OrderId = order.Id,
+                //        ProductId = cartItem.ProductId,
+                //        ProductName = cartItem.Product.Name,
+                //        Quantity = cartItem.Quantity,
+                //        OriginPrice = cartItem.Product.Price,
+                //        Price = price,
+                //        ImageUrl = cartItem.Product.ImageUrl,
+                //    });
+                //}
 
                 double shipCost = CalculateShip(total);
                 order.ShippingCost = shipCost;
@@ -96,7 +128,7 @@ namespace MyStore.Services.Orders
                 await _productRepository.UpdateAsync(listProductUpdate);
                 await _cartItemRepository.DeleteAsync(cartItems);
 
-                if(method != PaymentMethodEnum.COD.ToString())
+                if(method.Name != PaymentMethodEnum.COD.ToString())
                 {
                     return null;
                 }
@@ -155,9 +187,24 @@ namespace MyStore.Services.Orders
             };
         }
 
-        public Task<OrderDetailsResponse> GetOrderDetails(int id)
+        public async Task<OrderDetailsResponse> GetOrderDetails(long orderId)
         {
-            throw new NotImplementedException();
+            var order = await _orderRepository.SingleOrdefaultAsyncInclude(e => e.Id == orderId);
+            if (order != null)
+            {
+                return _mapper.Map<OrderDetailsResponse>(order);
+            }
+            throw new InvalidOperationException(ErrorMessage.ORDER_NOT_FOUND);
+        }
+
+        public async Task<OrderDetailsResponse> GetOrderDetailUser(long orderId, string userId)
+        {
+            var order = await _orderRepository.SingleOrdefaultAsyncInclude(e => e.Id == orderId && e.UserId == userId);
+            if (order != null)
+            {
+                return _mapper.Map<OrderDetailsResponse>(order);
+            }
+            throw new InvalidOperationException(ErrorMessage.ORDER_NOT_FOUND);
         }
     }
 }

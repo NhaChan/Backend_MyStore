@@ -347,6 +347,9 @@ namespace MyStore.Migrations
                     b.Property<int?>("PaymentMethodId")
                         .HasColumnType("int");
 
+                    b.Property<string>("PaymentMethodName")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("PaymentTranId")
                         .HasColumnType("nvarchar(max)");
 
@@ -385,6 +388,9 @@ namespace MyStore.Migrations
                         .HasColumnType("bigint");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("ImageUrl")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<long>("OrderId")
                         .HasColumnType("bigint");

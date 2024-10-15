@@ -25,6 +25,8 @@ using MyStore.DataSeeding;
 using MyStore.Services.Payments;
 using MyStore.Services.Orders;
 using MyStore.Repository.OrderRepository;
+using MyStore.Constant;
+using Net.payOS;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -93,6 +95,11 @@ builder.Services.AddAuthentication(option =>
 });
 
 builder.Services.AddAutoMapper(typeof(Mapping));
+
+PayOS payOS = new(builder.Configuration["PayOS:clientId"] ?? throw new Exception(ErrorMessage.ARGUMENT_NULL),
+                        builder.Configuration["PayOS:apiKey"] ?? throw new Exception(ErrorMessage.ARGUMENT_NULL),
+                        builder.Configuration["PayOS:checksumKey"] ?? throw new Exception(ErrorMessage.ARGUMENT_NULL));
+builder.Services.AddSingleton(payOS);
 
 builder.Services.AddCors(opt =>
 {

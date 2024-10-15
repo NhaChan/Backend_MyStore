@@ -24,7 +24,15 @@ namespace MyStore.Mapping
             CreateMap<Product, ProductDetailResponse>();
             CreateMap<AddressDTO, DeliveryAddress>().ReverseMap();
             CreateMap<PaymentMethodDTO, PaymentMethod>().ReverseMap();
-            CreateMap<OrderDTO, Order>().ReverseMap();
+
+            CreateMap<OrderDTO, Order>().ReverseMap()
+                .ForMember(d => d.PaymentMethod, opt => opt.MapFrom(src => src.PaymentMethodName));
+            CreateMap<OrderRequest, Order>().ReverseMap();
+            CreateMap<OrderDetail, ProductOrderDetails>();
+            CreateMap<Order, OrderDetailsResponse>()
+                .ForMember(d => d.ProductOrderDetails, opt => opt.MapFrom(src => src.OrderDetails));
+
+
         }
     }
 }
