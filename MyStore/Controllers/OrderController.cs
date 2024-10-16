@@ -23,8 +23,8 @@ namespace MyStore.Controllers
                 {
                     return Unauthorized();
                 }
-                var order = await _orderService.CreateOrder(userId, request);
-                return Ok(order);
+                var url = await _orderService.CreateOrder(userId, request);
+                return Ok(url);
             }
             catch(ArgumentException ex)
             {
@@ -32,7 +32,7 @@ namespace MyStore.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, ex.InnerException.Message);
+                return StatusCode(500, ex.Message);
             }
         }
 

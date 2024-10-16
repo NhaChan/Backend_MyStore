@@ -48,6 +48,10 @@ builder.Services.AddIdentity<User, IdentityRole>()
 
 builder.Services.AddMemoryCache();
 builder.Services.AddSingleton<ICachingService, CachingService>();
+PayOS payOS = new(builder.Configuration["PayOS:clientId"] ?? throw new Exception(ErrorMessage.ARGUMENT_NULL),
+                        builder.Configuration["PayOS:apiKey"] ?? throw new Exception(ErrorMessage.ARGUMENT_NULL),
+                        builder.Configuration["PayOS:checksumKey"] ?? throw new Exception(ErrorMessage.ARGUMENT_NULL));
+builder.Services.AddSingleton(payOS);
 
 builder.Services.AddScoped<IFileStorage, FileStorage>();
 
@@ -70,6 +74,7 @@ builder.Services.AddScoped<IDeliveryAdressRepository, DeliveryAddressRepository>
 builder.Services.AddScoped<IPaymentMethodRepository, PaymentMethodRepository>();
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 builder.Services.AddScoped<IOrderDetailRepository,  OrderDetailRepository>();
+builder.Services.AddScoped<IProductFavoriteRepository, ProductFavoriteRepository>();
 
 builder.Services.Configure<MailSettings>(builder.Configuration.GetSection("MailSettings"));
 builder.Services.AddSingleton<ISendMailService, SendMailService>();
@@ -95,11 +100,6 @@ builder.Services.AddAuthentication(option =>
 });
 
 builder.Services.AddAutoMapper(typeof(Mapping));
-
-PayOS payOS = new(builder.Configuration["PayOS:clientId"] ?? throw new Exception(ErrorMessage.ARGUMENT_NULL),
-                        builder.Configuration["PayOS:apiKey"] ?? throw new Exception(ErrorMessage.ARGUMENT_NULL),
-                        builder.Configuration["PayOS:checksumKey"] ?? throw new Exception(ErrorMessage.ARGUMENT_NULL));
-builder.Services.AddSingleton(payOS);
 
 builder.Services.AddCors(opt =>
 {

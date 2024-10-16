@@ -12,6 +12,8 @@ namespace MyStore.DTO
         public string PaymentMethod { get; set; }
         public DeliveryStatusEnum OrderStatus { get; set; }
 
+        public ProductDTO Product { get; set; }
+
     }
 
     public class ProductOrderDetails

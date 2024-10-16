@@ -80,5 +80,116 @@ namespace MyStore.Controllers
                 return StatusCode(500, ex.Message);
             }
         }
+
+        [HttpGet("info")]
+        public async Task<IActionResult> GetUserInfo()
+        {
+            try
+            {
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if( userId == null)
+                {
+                    return Unauthorized();
+                }
+                var result = await _userService.GetUserInfo(userId);
+                return Ok(result);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch(ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            } 
+            catch(Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
+
+        [HttpPut("info")]
+        public async Task<IActionResult> UpdateInfo([FromBody] UserDTO request)
+        {
+            try
+            {
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if(userId == null)
+                {
+                    return Unauthorized();
+                }
+                var result = await _userService.UpdateUserInfo(userId, request);
+                return Ok(result);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
+
+        [HttpPost("favorite")]
+        public async Task<IActionResult> AddFavorite([FromBody] IdRequest<int> request)
+        {
+            try
+            {
+                var usedId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if(usedId == null)
+                {
+                    return Unauthorized();
+                }
+                await _userService.AddProductFavorite(usedId, request.Id);
+                return Created();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
+
+        [HttpDelete("favorite/{productId}")]
+        public async Task<IActionResult> DeleteFavorite(int productId)
+        {
+            try
+            {
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if(userId == null)
+                {
+                    return Unauthorized();
+                }
+                await _userService.DeleteProductFavotite(userId, productId);
+                return NoContent();
+            }
+            catch(ArgumentException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch(Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
+
+        [HttpGet("favorite/product")]
+        public async Task<IActionResult> GetProductFavorite([FromBody] PageRequest request)
+        {
+            try
+            {
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (userId == null)
+                {
+                    return Unauthorized();
+                }
+                var productFavorite = await _userService.GetProductFavorite(userId, request);
+                return Ok(productFavorite);
+            }
+            catch(Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
     }
 }

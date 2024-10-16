@@ -23,5 +23,10 @@ namespace MyStore.Services.Caching
         {
             _memoryCache.Remove(cachekey);
         }
+
+        public void Set<T>(string cachekey, T value, MemoryCacheEntryOptions options)
+        {
+            _memoryCache.Set(cachekey, value, options);
+        }
     }
 }

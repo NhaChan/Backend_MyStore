@@ -18,6 +18,7 @@ namespace MyStore.Data
         public DbSet<PaymentMethod> PaymentMethods { get; set; }
         public DbSet<DeliveryStatus> DeliveryStatuses { get; set; }
         public DbSet<DeliveryAddress> DeliveryAddress { get; set; }
+        public DbSet<ProductFavorite> ProductFavorites { get; set; }
 
 
         private void UpdateTimestamps()

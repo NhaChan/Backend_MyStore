@@ -491,6 +491,27 @@ namespace MyStore.Migrations
                     b.ToTable("Products");
                 });
 
+            modelBuilder.Entity("MyStore.Models.ProductFavorite", b =>
+                {
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("UserId", "ProductId");
+
+                    b.HasIndex("ProductId");
+
+                    b.ToTable("ProductFavorites");
+                });
+
             modelBuilder.Entity("MyStore.Models.User", b =>
                 {
                     b.Property<string>("Id")
@@ -712,6 +733,25 @@ namespace MyStore.Migrations
                     b.Navigation("Brand");
 
                     b.Navigation("Caterory");
+                });
+
+            modelBuilder.Entity("MyStore.Models.ProductFavorite", b =>
+                {
+                    b.HasOne("MyStore.Models.Product", "Product")
+                        .WithMany()
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("MyStore.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Product");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("MyStore.Models.Category", b =>

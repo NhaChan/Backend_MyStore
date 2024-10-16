@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.Extensions.Caching.Memory;
 using MyStore.Constant;
 using MyStore.DTO;
 using MyStore.Enumerations;
@@ -8,6 +9,7 @@ using MyStore.Repository.OrderRepository;
 using MyStore.Repository.ProductRepository;
 using MyStore.Request;
 using MyStore.Response;
+using MyStore.Services.Caching;
 using MyStore.Services.Payments;
 using Net.payOS;
 using System.Linq.Expressions;
@@ -24,10 +26,14 @@ namespace MyStore.Services.Orders
         private readonly IMapper _mapper;
         private readonly IPaymentService _paymentService;
         private readonly PayOS _payOS;
+        private readonly IServiceScopeFactory _serviceScopeFactory;
+        private readonly ICachingService _cache;
+
 
         public OrderService(IOrderRepository orderRepository, IProductRepository productRepository, 
             ICartItemRepository cartItemRepository, IPaymentMethodRepository paymentMethodRepository, 
-            IMapper mapper, IPaymentService paymentService, IOrderDetailRepository orderDetailRepository, PayOS payOS)
+            IMapper mapper, IPaymentService paymentService, IOrderDetailRepository orderDetailRepository,
+            PayOS payOS, IServiceScopeFactory serviceScopeFactory, ICachingService cache)
         {
             _orderRepository = orderRepository;
             _productRepository = productRepository;
@@ -37,9 +43,20 @@ namespace MyStore.Services.Orders
             _paymentService = paymentService;
             _orderDetailRepository = orderDetailRepository;
             _payOS = payOS;
+            _serviceScopeFactory = serviceScopeFactory;
+            _cache = cache;
         }
 
-        private double CalculateShip(double price) => price >= 400000 ? 0 : price >= 200000 ? 20000 : 40000;
+        struct OrderCache
+        {
+            public string Url { get; set; }
+            public long OrderId { get; set; }
+            public string? payos_IpAddr { get; set; }
+            public string? payos_CreateDate { get; set; }
+            public string? payos_OrderInfo { get; set; }
+        }
+
+        private double CalculateShip(double price) => price >= 400000 ? 0 : price >= 200000 ? 2000 : 4000;
 
         public async Task<string?> CreateOrder(string userId, OrderRequest request)
         {
@@ -70,7 +87,7 @@ namespace MyStore.Services.Orders
 
                 var cartItems = await _cartItemRepository.GetAsync(e => e.UserId == userId && request.CartIds.Contains(e.ProductId));
                 var listProductUpdate = new List<Product>();
-                var listDetails = new List<OrderDetail>();
+                //var listDetails = new List<OrderDetail>();
 
                 var details = cartItems.Select(cartItem =>
                 {
@@ -128,16 +145,78 @@ namespace MyStore.Services.Orders
                 await _productRepository.UpdateAsync(listProductUpdate);
                 await _cartItemRepository.DeleteAsync(cartItems);
 
-                if(method.Name != PaymentMethodEnum.COD.ToString())
+
+                if(method.Name == PaymentMethodEnum.PayOS.ToString())
                 {
-                    return null;
+                    var orders = new PayOSOrderInfo
+                    {
+                        OrderId = order.Id,
+                        Amount = total,
+                        Products = details.Select(e => new ProductInfo
+                        {
+                            Name = e.ProductName,
+                            Price = e.Price,
+                            Quantity = e.Quantity,
+                        })
+                    };
+
+                    var paymentUrl = await _paymentService.GetPayOSURL(orders);
+                    var orderCache = new OrderCache()
+                    {
+                        OrderId = order.Id,
+                        Url = paymentUrl,
+                    };
+
+                    var cacheOptions = new MemoryCacheEntryOptions
+                    {
+                        AbsoluteExpiration = DateTimeOffset.Now.AddMinutes(15)
+                    };
+                    cacheOptions.RegisterPostEvictionCallback(OnPayOSDeadline, this);
+                    _cache.Set("Order " + order.Id, orderCache, cacheOptions);
+                    return paymentUrl;
                 }
-                return null;
+                else return null;
 
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                throw new Exception(ex.Message);
+                throw;
+            }
+        }
+
+        private async void OnPayOSDeadline(object key, object? value, EvictionReason reason, object? state)
+        {
+            if(value != null)
+            {
+                using var _scope = _serviceScopeFactory.CreateScope();
+                var orderRepository = _scope.ServiceProvider.GetRequiredService<IOrderRepository>();
+                var payOS = _scope.ServiceProvider.GetRequiredService<PayOS>();
+
+                var data = (OrderCache)value;
+
+                var paymentInfo = await payOS.getPaymentLinkInformation(data.OrderId);
+                if(paymentInfo.status == "PAID")
+                {
+                    var order = await orderRepository.FindAsync(data.OrderId);
+                    if(order != null)
+                    {
+                        if(paymentInfo.amount == order.Total)
+                        {
+                            order.PaymentTranId = paymentInfo.id;
+                            order.AmountPaid = paymentInfo.amountPaid;
+                            order.OrderStatus = DeliveryStatusEnum.Confirmed;
+                        }
+                        else
+                        {
+                            order.OrderStatus = DeliveryStatusEnum.Canceled;
+                        }
+                        await orderRepository.UpdateAsync(order);
+                    }
+                }
+                else if(paymentInfo.status != "CANCELLED")
+                {
+                    await payOS.cancelPaymentLink(data.OrderId);
+                }
             }
         }
 
@@ -147,6 +226,11 @@ namespace MyStore.Services.Orders
             var total = await _orderRepository.CountAsync();
 
             var items = _mapper.Map<IEnumerable<OrderDTO>> (orders);
+            foreach (var item in items)
+            {
+                var p = (await _orderDetailRepository.GetAsync(x => x.OrderId == item.Id)).FirstOrDefault()?.Product;
+                item.Product = _mapper.Map<ProductDTO>(p);
+            }
 
             return new PagedResponse<OrderDTO>
             {
@@ -169,9 +253,11 @@ namespace MyStore.Services.Orders
             }
             else
             {
+                bool isLong = long.TryParse(search, out long isSearch);
+
                 Expression<Func<Order, bool>> expression =
-                    e => e.Id.ToString().Contains(search)
-                    || (e.OrderStatus != null && e.OrderStatus.Value.ToString().Contains(search));
+                    e => e.Id.Equals(isSearch)
+                    || (!isLong && e.PaymentMethodName != null && e.PaymentMethodName.Contains(search));
 
                 totalOrder = await _orderRepository.CountAsync(expression);
                 orders = await _orderRepository.GetPageOrderByDescendingAsync(page, pageSize, expression, e => e.CreatedAt);

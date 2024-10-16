@@ -5,6 +5,8 @@ using MyStore.Models;
 using AutoMapper;
 using MyStore.DTO;
 using MyStore.Constant;
+using MyStore.Repository.ProductRepository;
+using MyStore.Request;
 
 namespace MyStore.Services.Users
 {
@@ -14,14 +16,33 @@ namespace MyStore.Services.Users
         private readonly IUserRepository _userRepository;
         private readonly IMapper _mapper;
         private readonly IDeliveryAdressRepository _deliveryAdressRepository;
+        private readonly IProductFavoriteRepository _productFavoriteRepository;
 
-        public UserService(UserManager<User> userManager, IUserRepository userRepository, IMapper mapper, IDeliveryAdressRepository deliveryAdressRepository)
+        public UserService(UserManager<User> userManager, IUserRepository userRepository,
+            IMapper mapper, IDeliveryAdressRepository deliveryAdressRepository,
+            IProductFavoriteRepository productFavoriteRepository)
         {
             _userManager = userManager;
             _userRepository = userRepository;
             _mapper = mapper;
             _deliveryAdressRepository = deliveryAdressRepository;
+            _productFavoriteRepository = productFavoriteRepository;
         }
+
+        public async Task AddProductFavorite(string userId, int productId)
+        {
+            var favorites = new ProductFavorite
+            {
+                UserId = userId,
+                ProductId = productId,
+            };
+            await _productFavoriteRepository.AddAsync(favorites);
+        }
+
+        public async Task DeleteProductFavotite(string userId, int productId)
+            => await _productFavoriteRepository.DeleteAsync(userId, productId);
+        
+
         public async Task<PagedResponse<UserResponse>> GetAllUserAsync(int page, int pageSize, string? keySearch)
         {
             int totalUser;
@@ -63,6 +84,32 @@ namespace MyStore.Services.Users
             };
         }
 
+        public async Task<PagedResponse<ProductDTO>> GetProductFavorite(string userId, PageRequest request)
+        {
+            var favorites = await _productFavoriteRepository
+                .GetPagedAsync(request.page, request.pageSize, e => e.UserId == userId, e => e.CreatedAt);
+            var total = await _productFavoriteRepository.CountAsync(e => e.UserId == userId);
+
+            var products = favorites.Select(e => e.Product).ToList();
+
+            var items = _mapper.Map<IEnumerable<ProductDTO>>(products).Select(x =>
+            {
+                var image = products.Single(e => e.Id == x.Id).Images.FirstOrDefault();
+                if (image != null)
+                {
+                    x.ImageUrl = image.ImageUrl;
+                }
+                return x;
+            });
+            return new PagedResponse<ProductDTO>
+            {
+                Items = items,
+                Page = request.page,
+                PageSize = request.pageSize,
+                TotalItems = total
+            };
+        }
+
         public async Task<AddressDTO?> GetUserAddress(string userId)
         {
             var delivery = await _deliveryAdressRepository.SingleOrDefaultAsync(e => e.User.Id == userId);
@@ -71,6 +118,17 @@ namespace MyStore.Services.Users
                 return _mapper.Map<AddressDTO>(delivery);
             }
             return null;
+        }
+
+        public async Task<UserDTO> GetUserInfo(string userId)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if(user != null)
+            {
+                var res = _mapper.Map<UserDTO>(user);
+                return res;
+            }
+            throw new InvalidOperationException(ErrorMessage.NOT_FOUND_USER);
         }
 
         public async Task<AddressDTO?> UpdateUserAddress(string userId, AddressDTO address)
@@ -117,6 +175,19 @@ namespace MyStore.Services.Users
             {
                 throw new Exception(ex.Message);
             }
+        }
+
+        public async Task<UserDTO> UpdateUserInfo(string userId, UserDTO request)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user != null)
+            {
+                user.FullName = request.Fullname;
+                user.PhoneNumber = request.PhoneNumber;
+                await _userManager.UpdateAsync(user);
+                return _mapper.Map<UserDTO>(user);
+            }
+            throw new InvalidOperationException(ErrorMessage.NOT_FOUND_USER);
         }
     }
 }

@@ -17,6 +17,7 @@ namespace MyStore.Mapping
             CreateMap<ProductRequest, Product>().ReverseMap();
             CreateMap<Product, ProductDTO>().ReverseMap();
             CreateMap<Product, ProductDTO>()
+                .ForMember(des => des.ImageUrl, opt => opt.MapFrom(src => src.Images.FirstOrDefault() != null ? src.Images.FirstOrDefault()!.ImageUrl : null))
                 .ForMember(des => des.BrandName, opt => opt.MapFrom(src => src.Brand.Name))
                 .ForMember(des => des.CategoryName, opt => opt.MapFrom(src => src.Caterory.Name));
 

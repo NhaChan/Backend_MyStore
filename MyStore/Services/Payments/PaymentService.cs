@@ -24,6 +24,7 @@ namespace MyStore.Services.Payments
             ICachingService cache)
         {
             _paymentMethodRepository = paymentMethodRepository;
+            _payOS = payOS;
             _mapper = mapper;
             _configuration = configuration;
             _orderRepository = orderRepository;
@@ -47,7 +48,7 @@ namespace MyStore.Services.Payments
             }
 
             List<ItemData> items = orderInfo.Products
-                .Select(e => new ItemData(e.Name, e.Quantity, (int)Math.Floor(e.Price))).ToList();
+                .Select(e => new ItemData("Mi", e.Quantity, (int)Math.Floor(e.Price))).ToList();
             PaymentData paymentData = new(orderInfo.OrderId, (int)Math.Floor(orderInfo.Amount),
                 "Thanh toan don hang: " + orderInfo.OrderId, items, cancelUrl, returnUrl);
 
