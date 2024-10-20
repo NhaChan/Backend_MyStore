@@ -97,7 +97,83 @@ namespace MyStore.Controllers
                 return StatusCode(500, ex.Message);
             }
         }
-        
+        [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> UpdateOrderStatus(long id, OrderStatusRequest request)
+        {
+            try
+            {
+                await _orderService.UpdateOrderStatus(id, request);
+                return NoContent();
+            }
+            catch (ArgumentException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Cancel(long id)
+        {
+            try
+            {
+                var role = User.FindAll(ClaimTypes.Role).Select(e => e.Value);
+                var isAdmin = role.Contains("Admin");
+                if(isAdmin)
+                {
+                    await _orderService.CancelOrder(id);
+                    return Ok();
+                }
+                else
+                {
+                    var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                    if (userId == null)
+                    {
+                        return Unauthorized();
+                    }
+                    await _orderService.CancelOrder(id, userId);
+                    return Ok();
+                }
+
+            }
+            catch (ArgumentException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
+
+        [HttpPut("next-status/{orderId}")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> NextOrderStatus(long orderId)
+        {
+            try
+            {
+                await _orderService.NextOrderStatus(orderId);
+                return Ok();
+            }
+            catch (InvalidDataException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
+
+
     }
 }
     

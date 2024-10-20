@@ -11,5 +11,9 @@ namespace MyStore.Services.Orders
         Task<PagedResponse<OrderDTO>> GetAllOrder(int page, int pageSize, string? search);
         Task<OrderDetailsResponse> GetOrderDetails(long orderId);
         Task<OrderDetailsResponse> GetOrderDetailUser(long orderId, string userId);
+        Task UpdateOrderStatus(long orderId, OrderStatusRequest reques);
+        Task CancelOrder(long orderId);
+        Task CancelOrder(long orderId, string userId);
+        Task NextOrderStatus(long orderId);
     }
 }

@@ -292,5 +292,71 @@ namespace MyStore.Services.Orders
             }
             throw new InvalidOperationException(ErrorMessage.ORDER_NOT_FOUND);
         }
+
+        public async Task UpdateOrderStatus(long orderId, OrderStatusRequest request)
+        {
+            var order = await _orderRepository.SingleOrDefaultAsync(x => x.Id == orderId);
+            if (order != null)
+            {
+                if (!order.OrderStatus.Equals(DeliveryStatusEnum.Canceled)
+                    || !order.OrderStatus.Equals(DeliveryStatusEnum.Received))
+                {
+                    order.OrderStatus += 1;
+                    await _orderRepository.UpdateAsync(order);
+                }
+                else throw new Exception(ErrorMessage.ERROR);
+            }
+            else throw new ArgumentException($"Id {orderId} " + ErrorMessage.NOT_FOUND);
+        }
+
+        public async Task CancelOrder(long orderId)
+        {
+            var order = await _orderRepository.SingleOrDefaultAsync(e => e.Id == orderId);
+            if (order != null)
+            {
+                if (order.OrderStatus.Equals(DeliveryStatusEnum.Proccessing)
+                    || order.OrderStatus.Equals(DeliveryStatusEnum.Confirmed))
+                {
+                    order.OrderStatus = DeliveryStatusEnum.Canceled;
+
+                    _cache.Remove("Order " + orderId);
+                    await _orderRepository.UpdateAsync(order);
+                }
+                else throw new Exception(ErrorMessage.ERROR);
+            }
+            else throw new ArgumentException($"Id {orderId} " + ErrorMessage.NOT_FOUND);
+        }
+        public async Task CancelOrder(long orderId, string userId)
+        {
+            var order = await _orderRepository.SingleOrDefaultAsync(e => e.Id == orderId && e.UserId == userId);
+            if (order != null)
+            {
+                if (order.OrderStatus.Equals(DeliveryStatusEnum.Proccessing)
+                    || order.OrderStatus.Equals(DeliveryStatusEnum.Confirmed))
+                {
+                    order.OrderStatus = DeliveryStatusEnum.Canceled;
+
+                    _cache.Remove("Order " + orderId);
+                    await _orderRepository.UpdateAsync(order);
+                }
+                else throw new Exception(ErrorMessage.ERROR);
+            }
+            else throw new ArgumentException($"Id {orderId} " + ErrorMessage.NOT_FOUND);
+        }
+
+        public async Task NextOrderStatus(long orderId)
+        {
+            var order = await _orderRepository.FindAsync(orderId);
+            if (order != null)
+            {
+                if (!order.OrderStatus.Equals(DeliveryStatusEnum.Received) || !order.OrderStatus.Equals(DeliveryStatusEnum.Canceled))
+                {
+                    order.OrderStatus += 1;
+                    await _orderRepository.UpdateAsync(order);
+                }
+                else throw new InvalidDataException(ErrorMessage.BAD_REQUEST);
+            }
+            else throw new InvalidOperationException(ErrorMessage.ORDER_NOT_FOUND);
+        }
     }
 }
