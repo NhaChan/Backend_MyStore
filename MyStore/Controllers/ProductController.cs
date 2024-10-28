@@ -134,5 +134,31 @@ namespace MyStore.Controllers
                 return StatusCode(500, ex.Message);
             }
         }
+
+        [HttpGet("name")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> GetNameProduct()
+        {
+            try
+            {
+                var namrProduct = await _productService.GetNameProduct();
+                return Ok(namrProduct);
+            }
+            catch(Exception ex) { return StatusCode(500, ex.Message);}
+        }
+
+        [HttpGet("{id}/reviews")]
+        public async Task<IActionResult> GetReviews(int id, [FromQuery] PageRequest request)
+        {
+            try
+            {
+                var result = await _productService.GetReviews(id, request);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
     }
 }

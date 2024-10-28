@@ -14,5 +14,8 @@ namespace MyStore.Services.Products
         Task<bool> UpdateProductEnableAsync(int id, UpdateEnableRequest request);
         Task DeleteProductAsync(int id);
         Task<PagedResponse<ProductDTO>> GetFilterProductsAsync(Filters filters);
+        Task<IEnumerable<NameDTO>> GetNameProduct();
+
+        Task<PagedResponse<ReviewDTO>> GetReviews(int id, PageRequest request);
     }
 }

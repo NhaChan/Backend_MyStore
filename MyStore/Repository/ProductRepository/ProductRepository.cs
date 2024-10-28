@@ -54,23 +54,49 @@ namespace MyStore.Repository.ProductRepository
         public override async Task<IEnumerable<Product>> GetPagedAsync<TKey>(int page, int pageSize, Expression<Func<Product, bool>>? expression, Expression<Func<Product, TKey>> orderBy)
         {
             return expression == null
-                ? await _dbContext.Products
+                ? await _dbContext.Products                    
+                    .Paginate(page, pageSize)
+                    .Include(e => e.Images)
                     .Include(e => e.Brand)
-                    .Include(e => e.Caterory).OrderBy(orderBy).Paginate(page, pageSize).ToListAsync()
+                    .Include(e => e.Caterory)
+                    .Include(e => e.ProductReviews)
+                    .AsSingleQuery()
+                    .OrderBy(orderBy)
+                    .ToArrayAsync()
                 : await _dbContext.Products
+                    .Where(expression)
+                    .Paginate(page, pageSize)
+                    .Include(e => e.Images)
                     .Include(e => e.Brand)
-                    .Include(e => e.Caterory).Where(expression).OrderBy(orderBy).Paginate(page, pageSize).ToListAsync();
+                    .Include(e => e.Caterory)
+                    .Include(e => e.ProductReviews)
+                    .AsSingleQuery()
+                    .OrderBy(orderBy)
+                    .ToArrayAsync();
         }
 
         public override async Task<IEnumerable<Product>> GetPageOrderByDescendingAsync<TKey>(int page, int pageSize, Expression<Func<Product, bool>>? expression, Expression<Func<Product, TKey>> orderByDesc)
         {
             return expression == null
                 ? await _dbContext.Products
+                    .OrderByDescending(orderByDesc)
+                    .Paginate(page, pageSize)
+                    .Include(e => e.Images)
                     .Include(e => e.Brand)
-                    .Include(e => e.Caterory).OrderBy(orderByDesc).Paginate(page, pageSize).ToListAsync()
+                    .Include(e => e.Caterory)
+                    .Include(e => e.ProductReviews)
+                    .AsSingleQuery()
+                    .ToArrayAsync()
                 : await _dbContext.Products
+                    .Where(expression)
+                    .OrderByDescending(orderByDesc)
+                    .Paginate(page, pageSize)
+                    .Include(e => e.Images)
                     .Include(e => e.Brand)
-                    .Include(e => e.Caterory).Where(expression).OrderBy(orderByDesc).Paginate(page, pageSize).ToListAsync();
+                    .Include(e => e.Caterory)
+                    .Include(e => e.ProductReviews)
+                    .AsSingleQuery()
+                    .ToArrayAsync();
         }
     }
 }

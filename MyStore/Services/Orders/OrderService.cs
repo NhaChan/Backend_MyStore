@@ -11,6 +11,7 @@ using MyStore.Request;
 using MyStore.Response;
 using MyStore.Services.Caching;
 using MyStore.Services.Payments;
+using MyStore.Storage;
 using Net.payOS;
 using System.Linq.Expressions;
 
@@ -28,12 +29,18 @@ namespace MyStore.Services.Orders
         private readonly PayOS _payOS;
         private readonly IServiceScopeFactory _serviceScopeFactory;
         private readonly ICachingService _cache;
+        private readonly IConfiguration _configuration;
+        private readonly IFileStorage _fileStorage;
+        private readonly IProductReviewRepository _productReviewRepository;
+
+        private readonly string pathReviewImages = "assets/images/reviews";
 
 
         public OrderService(IOrderRepository orderRepository, IProductRepository productRepository, 
             ICartItemRepository cartItemRepository, IPaymentMethodRepository paymentMethodRepository, 
             IMapper mapper, IPaymentService paymentService, IOrderDetailRepository orderDetailRepository,
-            PayOS payOS, IServiceScopeFactory serviceScopeFactory, ICachingService cache)
+            PayOS payOS, IServiceScopeFactory serviceScopeFactory, ICachingService cache,
+            IConfiguration configuration, IFileStorage fileStorage, IProductReviewRepository productReviewRepository)
         {
             _orderRepository = orderRepository;
             _productRepository = productRepository;
@@ -45,6 +52,9 @@ namespace MyStore.Services.Orders
             _payOS = payOS;
             _serviceScopeFactory = serviceScopeFactory;
             _cache = cache;
+            _configuration = configuration;
+            _fileStorage = fileStorage;
+            _productReviewRepository = productReviewRepository;
         }
 
         struct OrderCache
@@ -70,6 +80,8 @@ namespace MyStore.Services.Orders
                     OrderDate = now,
                     Receiver = request.Receiver,
                     Total = request.Total,
+                    DistrictID = request.DistrictID,
+                    WardID = request.WardID,
                 };
                 //var method = await _paymentService.IsActivePaymentMethod(request.PaymentMethodId)
                 //    ?? throw new ArgumentException(ErrorMessage.NOT_FOUND);
@@ -357,6 +369,181 @@ namespace MyStore.Services.Orders
                 else throw new InvalidDataException(ErrorMessage.BAD_REQUEST);
             }
             else throw new InvalidOperationException(ErrorMessage.ORDER_NOT_FOUND);
+        }
+
+        public async Task OrderToShipping(long orderId, OrderToShippingRequest request)
+        {
+            var order = await _orderRepository.SingleOrdefaultAsyncInclude(e => e.Id == orderId)
+                ?? throw new InvalidDataException(ErrorMessage.ORDER_NOT_FOUND);
+            if(order.OrderStatus != DeliveryStatusEnum.Confirmed)
+            {
+                throw new InvalidDataException(ErrorMessage.BAD_REQUEST);
+            }
+
+            var token = _configuration["GHN:Token"];
+            var shopId = _configuration["GHN:ShopId"];
+            var url = _configuration["GHN:Url"];
+
+            var receiver = order.Receiver.Split('-').Select(e => e?.Trim()).ToArray();
+            var to_name = receiver[0];
+            var to_phone = receiver[1];
+
+            if(token == null || shopId == null || url == null || to_name == null || to_phone == null)
+            {
+                throw new ArgumentNullException(ErrorMessage.ARGUMENT_NULL);
+            }
+
+            var to_address = order.DeliveryAddress;
+            var to_ward_code = order.WardID;
+            var to_district_id = order.DistrictID;
+
+            var items = order.OrderDetails.Select(e => new
+            {
+                name = e.ProductName,
+                quantity = e.Quantity,
+                price = (int)Math.Floor(e.Price)
+            }).ToArray();
+
+            var cod_amount = order.AmountPaid < order.Total ? order.Total : 0;
+
+            var data = new
+            {
+                cod_amount,
+                to_name,
+                to_phone,
+                to_address,
+                to_ward_code,
+                to_district_id,
+                service_type_id = 2,
+                payment_type_id = 1,
+                weight = request.Weight,
+                length = request.Length,
+                width = request.Width,
+                height = request.Height,
+                required_note = request.RequiredNote.ToString(),
+                items
+            };
+
+            using var httpClient = new HttpClient();
+
+            httpClient.DefaultRequestHeaders.Add("ShopId", shopId);
+            httpClient.DefaultRequestHeaders.Add("Token", token);
+
+            var res = await httpClient.PostAsJsonAsync(url + "/create", data);
+            var dataResponse = await res.Content.ReadFromJsonAsync<GHNResponse>();
+            if (!res.IsSuccessStatusCode)
+            {
+                throw new InvalidDataException(dataResponse?.Message ?? ErrorMessage.BAD_REQUEST);
+            }
+
+            order.ShippingCode = dataResponse?.Data?.Order_code;
+            order.Expected_delivery_time = dataResponse?.Data?.Expected_delivery_time;
+
+            order.OrderStatus = DeliveryStatusEnum.AwaitingPickup;
+            await _orderRepository.UpdateAsync(order);
+        }
+
+        public async Task<PagedResponse<OrderDTO>> GetWithOrderStatus(DeliveryStatusEnum statusEnum, PageRequest request)
+        {
+            int totalOrder;
+            IEnumerable<Order> orders;
+
+            int page = request.page, pageSize = request.pageSize;
+            string? key = request.search?.ToLower();
+
+            Expression<Func<Order, DateTime?>> sortExpression = e => e.UpdatedAt;
+
+            if(statusEnum == DeliveryStatusEnum.Proccessing)
+            {
+                sortExpression = e => e.CreatedAt;
+            }
+
+            if (string.IsNullOrEmpty(key))
+            {
+                totalOrder = await _orderRepository.CountAsync(e => e.OrderStatus == statusEnum);
+                orders = await _orderRepository.GetPageOrderByDescendingAsync(page, pageSize, e => e.OrderStatus == statusEnum, sortExpression);
+            }
+
+            else
+            {
+                bool isLong = long.TryParse(key, out long idSearch);
+
+                Expression<Func<Order, bool>> expression =
+                    e => e.OrderStatus == statusEnum &&
+                    (isLong && e.Id.Equals(idSearch) ||
+                    e.PaymentMethodName.ToLower().Contains(key));
+
+                totalOrder = await _orderRepository.CountAsync(expression);
+                orders = await _orderRepository.GetPageOrderByDescendingAsync(page, pageSize, expression, sortExpression);
+            }
+
+            var items = _mapper.Map<IEnumerable<OrderDTO>>(orders);
+            return new PagedResponse<OrderDTO>
+            {
+                Items = items,
+                Page = page,
+                PageSize = pageSize,
+                TotalItems = totalOrder
+            };
+        }
+
+        public async Task Review(long orderId, string userId, IEnumerable<ReviewRequest> reviews)
+        {
+            try
+            {
+                var order = await _orderRepository.SingleOrDefaultAsync(e => e.Id == orderId && e.UserId == userId)
+                    ?? throw new InvalidOperationException(ErrorMessage.ORDER_NOT_FOUND);
+                if(order.OrderStatus != DeliveryStatusEnum.Received)
+                {
+                    throw new InvalidDataException("Bạn chưa thể đánh giá đơn hàng này!");
+                }
+                List<ProductReview> pReviews = new();
+                List<Product> products = new();
+
+                foreach (var review in reviews)
+                {
+                    var productPath = pathReviewImages + "/" + review.ProductId;
+                    List<string>? pathNames = null;
+
+                    if(review.Images != null)
+                    {
+                        pathNames = new();
+                        var imgNames = review.Images.Select(image =>
+                        {
+                            var name = Guid.NewGuid().ToString() + Path.GetExtension(image.FileName);
+                            pathNames.Add(Path.Combine(productPath, name));
+                            return name;
+                        }).ToList();
+                        await _fileStorage.SaveAsync(productPath, review.Images, imgNames);
+                    }
+
+                    var product = await _productRepository.FindAsync(review.ProductId);
+                    if(product != null)
+                    {
+                        var currentStar = product.Rating * product.RatingCount;
+                        product.Rating = (currentStar + review.Star) / (product.RatingCount + 1);
+                        product.RatingCount += 1;
+
+                        products.Add(product);
+                        pReviews.Add(new ProductReview
+                        {
+                            ProductId = review.ProductId,
+                            UserId = userId,
+                            Star = review.Star,
+                            Description = review.Description,
+                            ImagesUrls = pathNames,
+                        });
+                    }
+                }
+                await _productReviewRepository.AddAsync(pReviews);
+                await _productRepository.UpdateAsync(products);
+                order.Reviewed = true;
+                await _orderRepository.UpdateAsync(order); 
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using MyStore.Enumerations;
 using MyStore.Request;
 using MyStore.Services.Orders;
 using System.Security.Claims;
@@ -56,6 +57,7 @@ namespace MyStore.Controllers
                 return StatusCode(500, ex.Message);
             }
         }
+
         [HttpGet("get-all")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetAll([FromQuery] PageRequest request)
@@ -97,6 +99,7 @@ namespace MyStore.Controllers
                 return StatusCode(500, ex.Message);
             }
         }
+
         [HttpPut("{id}")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> UpdateOrderStatus(long id, OrderStatusRequest request)
@@ -173,7 +176,70 @@ namespace MyStore.Controllers
             }
         }
 
+        [HttpPut("shipping/{orderId}")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Shipping(long orderId, [FromBody] OrderToShippingRequest request)
+        {
+            try
+            {
+                await _orderService.OrderToShipping(orderId, request);
+                return Ok();
+            }
+            catch (InvalidDataException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
 
+        [HttpGet("status/{status}")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> GetWithOrderStatus(DeliveryStatusEnum status, [FromQuery] PageRequest request)
+        {
+            try
+            {
+                var result = await _orderService.GetWithOrderStatus(status, request);
+                return Ok(result);
+            }
+            catch(Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
+
+        [HttpPost("review/{id}")]
+        public async Task<IActionResult> Review(long id, [FromForm] IEnumerable<ReviewRequest> reviews)
+        {
+            try
+            {
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (userId == null)
+                {
+                    return Unauthorized();
+                }
+                await _orderService.Review(id, userId, reviews);
+                return Ok();
+            }
+            catch (InvalidOperationException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (InvalidDataException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
     }
 }
     

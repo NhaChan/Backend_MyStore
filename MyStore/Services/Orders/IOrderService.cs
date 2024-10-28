@@ -1,4 +1,5 @@
 ﻿using MyStore.DTO;
+using MyStore.Enumerations;
 using MyStore.Request;
 using MyStore.Response;
 
@@ -15,5 +16,8 @@ namespace MyStore.Services.Orders
         Task CancelOrder(long orderId);
         Task CancelOrder(long orderId, string userId);
         Task NextOrderStatus(long orderId);
+        Task OrderToShipping(long orderId, OrderToShippingRequest request);
+        Task<PagedResponse<OrderDTO>> GetWithOrderStatus(DeliveryStatusEnum statusEnumm, PageRequest request);
+        Task Review(long orderId, string userId, IEnumerable<ReviewRequest> reviews);
     }
 }

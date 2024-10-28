@@ -246,10 +246,10 @@ namespace MyStore.Migrations
                     b.Property<string>("Detail")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("District_id")
+                    b.Property<int?>("DistrictID")
                         .HasColumnType("int");
 
-                    b.Property<string>("District_name")
+                    b.Property<string>("DistrictName")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
@@ -259,19 +259,19 @@ namespace MyStore.Migrations
                     b.Property<string>("PhoneNumber")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("Province_id")
+                    b.Property<int?>("ProvinceID")
                         .HasColumnType("int");
 
-                    b.Property<string>("Province_name")
+                    b.Property<string>("ProvinceName")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<int?>("Ward_id")
+                    b.Property<int?>("WardID")
                         .HasColumnType("int");
 
-                    b.Property<string>("Ward_name")
+                    b.Property<string>("WardName")
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("UserId");
@@ -338,6 +338,12 @@ namespace MyStore.Migrations
                     b.Property<string>("DeliveryStatusName")
                         .HasColumnType("nvarchar(450)");
 
+                    b.Property<int>("DistrictID")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("Expected_delivery_time")
+                        .HasColumnType("datetime2");
+
                     b.Property<DateTime>("OrderDate")
                         .HasColumnType("datetime2");
 
@@ -353,8 +359,17 @@ namespace MyStore.Migrations
                     b.Property<string>("PaymentTranId")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<DateTime?>("ReceivedDate")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("Receiver")
                         .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("Reviewed")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("ShippingCode")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<double>("ShippingCost")
@@ -369,6 +384,10 @@ namespace MyStore.Migrations
                     b.Property<string>("UserId")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("WardID")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
@@ -476,6 +495,12 @@ namespace MyStore.Migrations
                     b.Property<int>("Quantity")
                         .HasColumnType("int");
 
+                    b.Property<float>("Rating")
+                        .HasColumnType("real");
+
+                    b.Property<long>("RatingCount")
+                        .HasColumnType("bigint");
+
                     b.Property<int>("Sold")
                         .HasColumnType("int");
 
@@ -510,6 +535,104 @@ namespace MyStore.Migrations
                     b.HasIndex("ProductId");
 
                     b.ToTable("ProductFavorites");
+                });
+
+            modelBuilder.Entity("MyStore.Models.ProductReview", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("ImagesUrlsJson")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Star")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("ProductReviews");
+                });
+
+            modelBuilder.Entity("MyStore.Models.StockReceipt", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("EntryDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Note")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<double>("Total")
+                        .HasColumnType("float");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("StockReceipts");
+                });
+
+            modelBuilder.Entity("MyStore.Models.StockReceiptDetail", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<double>("OriginPrice")
+                        .HasColumnType("float");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.Property<long>("StockReceiptId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductId");
+
+                    b.HasIndex("StockReceiptId");
+
+                    b.ToTable("StockReceiptDetails");
                 });
 
             modelBuilder.Entity("MyStore.Models.User", b =>
@@ -754,6 +877,51 @@ namespace MyStore.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("MyStore.Models.ProductReview", b =>
+                {
+                    b.HasOne("MyStore.Models.Product", "Product")
+                        .WithMany("ProductReviews")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("MyStore.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId");
+
+                    b.Navigation("Product");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("MyStore.Models.StockReceipt", b =>
+                {
+                    b.HasOne("MyStore.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("MyStore.Models.StockReceiptDetail", b =>
+                {
+                    b.HasOne("MyStore.Models.Product", "Product")
+                        .WithMany()
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("MyStore.Models.StockReceipt", "StockReceipt")
+                        .WithMany("StockReceiptDetails")
+                        .HasForeignKey("StockReceiptId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Product");
+
+                    b.Navigation("StockReceipt");
+                });
+
             modelBuilder.Entity("MyStore.Models.Category", b =>
                 {
                     b.Navigation("Products");
@@ -777,6 +945,13 @@ namespace MyStore.Migrations
             modelBuilder.Entity("MyStore.Models.Product", b =>
                 {
                     b.Navigation("Images");
+
+                    b.Navigation("ProductReviews");
+                });
+
+            modelBuilder.Entity("MyStore.Models.StockReceipt", b =>
+                {
+                    b.Navigation("StockReceiptDetails");
                 });
 
             modelBuilder.Entity("MyStore.Models.User", b =>

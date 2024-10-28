@@ -150,6 +150,25 @@ namespace MyStore.Controllers
             }
         }
 
+        [HttpGet("favorite")]
+        public async Task<IActionResult> GetFavorite()
+        {
+            try
+            {
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (userId == null)
+                {
+                    return Unauthorized();
+                }
+                var result = await _userService.GetFavorites(userId);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
+
         [HttpDelete("favorite/{productId}")]
         public async Task<IActionResult> DeleteFavorite(int productId)
         {
@@ -173,8 +192,8 @@ namespace MyStore.Controllers
             }
         }
 
-        [HttpGet("favorite/product")]
-        public async Task<IActionResult> GetProductFavorite([FromBody] PageRequest request)
+        [HttpGet("favorite-product")]
+        public async Task<IActionResult> GetProductFavorite([FromQuery] PageRequest request)
         {
             try
             {

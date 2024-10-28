@@ -27,6 +27,8 @@ using MyStore.Services.Orders;
 using MyStore.Repository.OrderRepository;
 using MyStore.Constant;
 using Net.payOS;
+using MyStore.Repository.StockReceiptRepository;
+using MyStore.Services.StockReceipts;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -63,6 +65,7 @@ builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<ICartItemService, CartItemService>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
+builder.Services.AddScoped<IStockReceiptService, StockReceiptService>();
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
@@ -75,6 +78,9 @@ builder.Services.AddScoped<IPaymentMethodRepository, PaymentMethodRepository>();
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 builder.Services.AddScoped<IOrderDetailRepository,  OrderDetailRepository>();
 builder.Services.AddScoped<IProductFavoriteRepository, ProductFavoriteRepository>();
+builder.Services.AddScoped<IProductReviewRepository, ProductReviewRepository>();
+builder.Services.AddScoped<IStockReceiptRepository, StockReceiptRepository>();
+builder.Services.AddScoped<IStockReceiptDetailRepository, StockReceiptDetailRepository>();
 
 builder.Services.Configure<MailSettings>(builder.Configuration.GetSection("MailSettings"));
 builder.Services.AddSingleton<ISendMailService, SendMailService>();

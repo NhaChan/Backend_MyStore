@@ -20,7 +20,12 @@ namespace MyStore.Models
         public Category Caterory { get; set; }
         public int BrandId { get; set; }
         public Brand Brand { get; set; }
+
+        [Range(0,5)]
+        public float Rating { get; set; }
+        public long RatingCount { get; set; }
         //public Type Type { get; set; }
         public ICollection<Image> Images { get; set; } = new HashSet<Image>();
+        public ICollection<ProductReview> ProductReviews { get; } = new HashSet<ProductReview>();
     }
 }

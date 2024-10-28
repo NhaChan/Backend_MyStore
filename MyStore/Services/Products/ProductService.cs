@@ -21,13 +21,15 @@ namespace MyStore.Services.Products
         private readonly IMapper _mapper;
         private readonly IFileStorage _fileStorage;
         private readonly string path = "assets/images/products";
+        private readonly IProductReviewRepository _productReviewRepository;
 
-        public ProductService(IProductRepository productRepository, IImageRepository imageRepository, IMapper mapper, IFileStorage fileStorage)
+        public ProductService(IProductRepository productRepository, IImageRepository imageRepository, IMapper mapper, IFileStorage fileStorage, IProductReviewRepository productReviewRepository)
         {
             _productRepository = productRepository;
             _imageRepository = imageRepository;
             _mapper = mapper;
             _fileStorage = fileStorage;
+            _productReviewRepository = productReviewRepository;
         }
 
         public async Task<ProductDTO> CreatedProductAsync(ProductRequest request, IFormFileCollection images)
@@ -93,7 +95,7 @@ namespace MyStore.Services.Products
                 }
                 else
                 {
-                    Expression<Func<Product, bool>> expression = e => 
+                    Expression<Func<Product, bool>> expression = e =>
                         e.Name.Contains(search)
                         || e.Sold.ToString().Equals(search)
                         || e.Price.ToString().Equals(search);
@@ -297,6 +299,50 @@ namespace MyStore.Services.Products
                 return product.Enable;
             }
             else throw new ArgumentException($"Id {id} " + ErrorMessage.NOT_FOUND);
+        }
+
+        public async Task<IEnumerable<NameDTO>> GetNameProduct()
+        {
+            var nameProduct = await _productRepository.GetAllAsync();
+            return _mapper.Map<IEnumerable<NameDTO>>(nameProduct);
+        }
+
+        private string MaskUsername(string username)
+        {
+            var words = username.Split(' '); ;
+            return string.Join(" ", words.Select(x =>
+            {
+                var trim = x.Trim();
+                if (trim.Length > 1)
+                {
+                    return $"{trim[0]}{new string('*', trim.Length - 1)}";
+                }
+                return trim;
+            }));
+        }
+
+        public async Task<PagedResponse<ReviewDTO>> GetReviews(int id, PageRequest request)
+        {
+            var reviews = await _productReviewRepository.GetPageOrderByDescendingAsync(request.page, request.pageSize, e => e.ProductId == id, e => e.CreatedAt);
+            if(reviews == null)
+            {
+                throw new Exception("Lỗi");
+            }
+
+            var total = await _productReviewRepository.CountAsync(e => e.ProductId == id);
+
+            var items = _mapper.Map<IEnumerable<ReviewDTO>>(reviews).Select(x =>
+            {
+                x.Username = MaskUsername(x.Username); return x;
+            });
+
+            return new PagedResponse<ReviewDTO>
+            {
+                Items = items,
+                TotalItems = total,
+                Page = request.page,
+                PageSize = request.pageSize
+            };
         }
     }
 }

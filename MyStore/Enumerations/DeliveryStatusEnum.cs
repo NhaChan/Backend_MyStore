@@ -4,6 +4,7 @@
     {
         Proccessing,
         Confirmed,
+        AwaitingPickup,
         Shipping,
         Received,
         Canceled,

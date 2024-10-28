@@ -84,6 +84,12 @@ namespace MyStore.Services.Users
             };
         }
 
+        public async Task<IEnumerable<int>> GetFavorites(string userId)
+        {
+            var favorites = await _productFavoriteRepository.GetAsync(e => e.UserId == userId);
+            return favorites.Select(e => e.ProductId);
+        }
+
         public async Task<PagedResponse<ProductDTO>> GetProductFavorite(string userId, PageRequest request)
         {
             var favorites = await _productFavoriteRepository
@@ -141,12 +147,12 @@ namespace MyStore.Services.Users
                     delivery.Name = address.Name;
                     delivery.PhoneNumber = address.PhoneNumber;
                     delivery.Detail = address.Detail;
-                    delivery.Province_id = address.Province_id;
-                    delivery.Province_name = address.Province_name;
-                    delivery.District_id = address.District_id;
-                    delivery.District_name = address.District_name;
-                    delivery.Ward_id = address.Ward_id;
-                    delivery.Ward_name = address.Ward_name;
+                    delivery.ProvinceID = address.ProvinceID;
+                    delivery.ProvinceName = address.ProvinceName;
+                    delivery.DistrictID = address.DistrictID;
+                    delivery.DistrictName = address.DistrictName;
+                    delivery.WardID = address.WardID;
+                    delivery.WardName = address.WardName;
 
                     await _deliveryAdressRepository.UpdateAsync(delivery);
                     
@@ -159,12 +165,12 @@ namespace MyStore.Services.Users
                         Name = address.Name,
                         PhoneNumber = address.PhoneNumber,
                         Detail = address.Detail,
-                        Province_id = address.Province_id,
-                        Province_name = address.Province_name,
-                        District_id = address.District_id,
-                        District_name = address.District_name,
-                        Ward_id = address.Ward_id,
-                        Ward_name = address.Ward_name
+                        ProvinceID = address.ProvinceID,
+                        ProvinceName = address.ProvinceName,
+                        DistrictID = address.DistrictID,
+                        DistrictName = address.DistrictName,
+                        WardID = address.WardID,
+                        WardName = address.WardName
                     };
 
                     await _deliveryAdressRepository.AddAsync(delivery);

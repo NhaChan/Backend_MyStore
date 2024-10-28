@@ -14,5 +14,6 @@ namespace MyStore.Services.Users
         Task AddProductFavorite(string userId, int productId);
         Task DeleteProductFavotite(string userId, int productId);
         Task<PagedResponse<ProductDTO>> GetProductFavorite(string userId, PageRequest request);
+        Task<IEnumerable<int>> GetFavorites(string userId);
     }
 }

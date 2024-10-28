@@ -8,18 +8,20 @@ namespace MyStore.Data
     public class CompanyDBContext : IdentityDbContext<User>
     {
         public CompanyDBContext(DbContextOptions<CompanyDBContext> options) : base(options) { }
-        public DbSet<Brand> Brands { get; set; }
-        public DbSet<Category> Caterories { get; set; }
-        public DbSet<Product> Products { get; set; }
-        public DbSet<Image> Images { get; set; }
-        public DbSet<CartItem> CartItems { get; set; }
-        public DbSet<Order> Orders { get; set; }
-        public DbSet<OrderDetail> OrderDetails { get; set; }
-        public DbSet<PaymentMethod> PaymentMethods { get; set; }
-        public DbSet<DeliveryStatus> DeliveryStatuses { get; set; }
-        public DbSet<DeliveryAddress> DeliveryAddress { get; set; }
-        public DbSet<ProductFavorite> ProductFavorites { get; set; }
-
+        public virtual DbSet<Brand> Brands { get; set; }
+        public virtual DbSet<Category> Caterories { get; set; }
+        public virtual DbSet<Product> Products { get; set; }
+        public virtual DbSet<Image> Images { get; set; }
+        public virtual DbSet<CartItem> CartItems { get; set; }
+        public virtual DbSet<Order> Orders { get; set; }
+        public virtual DbSet<OrderDetail> OrderDetails { get; set; }
+        public virtual DbSet<PaymentMethod> PaymentMethods { get; set; }
+        public virtual DbSet<DeliveryStatus> DeliveryStatuses { get; set; }
+        public virtual DbSet<DeliveryAddress> DeliveryAddress { get; set; }
+        public virtual DbSet<ProductFavorite> ProductFavorites { get; set; }
+        public virtual DbSet<ProductReview> ProductReviews { get; set; }
+        public virtual DbSet<StockReceipt> StockReceipts { get; set; }
+        public virtual DbSet<StockReceiptDetail> StockReceiptDetails { get; set; }
 
         private void UpdateTimestamps()
         {
@@ -30,11 +32,11 @@ namespace MyStore.Data
             {
                 if(entry.State == EntityState.Added)
                 {
-                    ((IBaseEntity)entry.Entity).CreatedAt = DateTime.UtcNow;
+                    ((IBaseEntity)entry.Entity).CreatedAt = DateTime.Now;
                 }
                 if(entry.State == EntityState.Modified)
                 {
-                    ((IBaseEntity)entry.Entity).UpdatedAt = DateTime.UtcNow;
+                    ((IBaseEntity)entry.Entity).UpdatedAt = DateTime.Now;
                 }
             }
         }

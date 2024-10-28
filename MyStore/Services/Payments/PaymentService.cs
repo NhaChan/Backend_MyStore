@@ -66,7 +66,7 @@ namespace MyStore.Services.Payments
         {
             if(request.Code == "00")
             {
-                var order = await _orderRepository.FindAsync(request.Code);
+                var order = await _orderRepository.FindAsync(request.OrderCode);
                 if(order != null)
                 {
                     var paymentInfo = await _payOS.getPaymentLinkInformation(request.OrderCode);
