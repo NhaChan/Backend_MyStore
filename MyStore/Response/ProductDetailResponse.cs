@@ -12,5 +12,8 @@
         public int CategoryId { get; set; }
         public int BrandId { get; set; }
         public IEnumerable<string> ImageUrls { get; set; }
+        public float Rating { get; set; }
+        public long RatingCount { get; set; }
+
     }
 }

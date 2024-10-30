@@ -19,6 +19,7 @@ namespace MyStore.DTO
         public string? PayBackUrl { get; set; }
 
         public ProductDTO Product { get; set; }
+        public bool Reviewed { get; set; }
 
     }
 

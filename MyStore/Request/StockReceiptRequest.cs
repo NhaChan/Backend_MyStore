@@ -10,6 +10,7 @@
     {
         public double Total { get; set; }
         public string? Note { get; set; }
+        public DateTime EntryDate { get; set; }
         public IEnumerable<StockReceiptProduct> StockReceiptProducts { get; set; }
     }
 }

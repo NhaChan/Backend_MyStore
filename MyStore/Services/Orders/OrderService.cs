@@ -487,6 +487,56 @@ namespace MyStore.Services.Orders
             };
         }
 
+        public async Task<PagedResponse<OrderDTO>> GetWithOrderStatusUser(string userId, DeliveryStatusEnum statusEnum, PageRequest request)
+        {
+            int totalOrder;
+            IEnumerable<Order> orders;
+
+            int page = request.page, pageSize = request.pageSize;
+            string? key = request.search?.ToLower();
+
+            Expression<Func<Order, DateTime?>> sortExpression = e => e.UpdatedAt;
+
+            if (statusEnum == DeliveryStatusEnum.Proccessing)
+            {
+                sortExpression = e => e.CreatedAt;
+            }
+
+            if (string.IsNullOrEmpty(key))
+            {
+                totalOrder = await _orderRepository.CountAsync(e => e.UserId == userId && e.OrderStatus == statusEnum);
+                orders = await _orderRepository.GetPageOrderByDescendingAsync(page, pageSize, x => x.UserId == userId && x.OrderStatus == statusEnum, sortExpression);
+            }
+
+            else
+            {
+                bool isLong = long.TryParse(key, out long idSearch);
+
+                Expression<Func<Order, bool>> expression =
+                    e => e.OrderStatus == statusEnum &&
+                    e.UserId == userId &&
+                    (isLong && e.Id.Equals(idSearch) ||
+                    e.PaymentMethodName.ToLower().Contains(key));
+
+                totalOrder = await _orderRepository.CountAsync(expression);
+                orders = await _orderRepository.GetPageOrderByDescendingAsync(page, pageSize, expression, sortExpression);
+            }
+
+            var items = _mapper.Map<IEnumerable<OrderDTO>>(orders);
+            foreach (var item in items)
+            {
+                var p = (await _orderDetailRepository.GetAsync(x => x.OrderId == item.Id)).FirstOrDefault()?.Product;
+                item.Product = _mapper.Map<ProductDTO>(p);
+            }
+            return new PagedResponse<OrderDTO>
+            {
+                Items = items,
+                Page = page,
+                PageSize = pageSize,
+                TotalItems = totalOrder
+            };
+        }
+
         public async Task Review(long orderId, string userId, IEnumerable<ReviewRequest> reviews)
         {
             try

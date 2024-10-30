@@ -33,7 +33,7 @@ namespace MyStore.Services.StockReceipts
                 UserId = userId,
                 Note = request.Note,
                 Total = request.Total,
-                EntryDate = DateTime.Now,
+                EntryDate = request.EntryDate
             };
             await _stockReceiptRepository.AddAsync(recceipt);
 

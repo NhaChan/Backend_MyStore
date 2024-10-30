@@ -18,6 +18,7 @@ namespace MyStore.Services.Orders
         Task NextOrderStatus(long orderId);
         Task OrderToShipping(long orderId, OrderToShippingRequest request);
         Task<PagedResponse<OrderDTO>> GetWithOrderStatus(DeliveryStatusEnum statusEnumm, PageRequest request);
+        Task<PagedResponse<OrderDTO>> GetWithOrderStatusUser(string userId, DeliveryStatusEnum statusEnum, PageRequest request);
         Task Review(long orderId, string userId, IEnumerable<ReviewRequest> reviews);
     }
 }

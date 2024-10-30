@@ -12,5 +12,7 @@ namespace MyStore.Response
         public string DeliveryAddress { get; set; }
         public string Receiver { get; set; }
         public double AmountPaid { get; set; }
+        public string PaymentMethodName { get; set; }
+        public string OrderStatus { get; set; }
     }
 }

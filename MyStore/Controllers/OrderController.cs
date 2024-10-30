@@ -214,6 +214,26 @@ namespace MyStore.Controllers
             }
         }
 
+        [HttpGet("user/{status}")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> GetWithOrderStatusUser(DeliveryStatusEnum status, [FromQuery] PageRequest request)
+        {
+            try
+            {
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (userId == null)
+                {
+                    return Unauthorized();
+                }
+                var result = await _orderService.GetWithOrderStatusUser(userId, status, request);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
+
         [HttpPost("review/{id}")]
         public async Task<IActionResult> Review(long id, [FromForm] IEnumerable<ReviewRequest> reviews)
         {
