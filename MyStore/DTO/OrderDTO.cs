@@ -4,7 +4,7 @@ namespace MyStore.DTO
 {
     public class OrderDTO
     {
-        public int Id { get; set; }
+        public long Id { get; set; }
         public double ShippingCost { get; set; }
         public double Total { get; set; }
         public double AmountPaid { get; set; }
@@ -20,6 +20,7 @@ namespace MyStore.DTO
 
         public ProductDTO Product { get; set; }
         public bool Reviewed { get; set; }
+        public DateTime? DateReceived { get; set; }
 
     }
 

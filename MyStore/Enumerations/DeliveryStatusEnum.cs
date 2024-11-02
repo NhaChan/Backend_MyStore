@@ -7,6 +7,7 @@
         AwaitingPickup,
         Shipping,
         Received,
+        Finish,
         Canceled,
     }
 }

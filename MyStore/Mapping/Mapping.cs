@@ -39,7 +39,8 @@ namespace MyStore.Mapping
             CreateMap<Order, OrderDetailsResponse>()
                 .ForMember(d => d.ProductOrderDetails, opt => opt.MapFrom(src => src.OrderDetails));
 
-            CreateMap<StockReceiptDTO, StockReceipt>().ReverseMap();
+            CreateMap<StockReceipt, StockReceiptDTO>()
+                .ForMember(d => d.UserName, opt => opt.MapFrom(src => src.User.FullName));
 
             CreateMap<StockReceiptDetail, StockReceiptDetailResponse>()
                 .ForMember(d => d.ProductName, opt => opt.MapFrom(src => src.Product.Name));

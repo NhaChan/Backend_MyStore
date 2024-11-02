@@ -29,6 +29,8 @@ using MyStore.Constant;
 using Net.payOS;
 using MyStore.Repository.StockReceiptRepository;
 using MyStore.Services.StockReceipts;
+using MyStore.Services.Expenses;
+using MyStore.Services.Statistics;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -66,6 +68,8 @@ builder.Services.AddScoped<ICartItemService, CartItemService>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IStockReceiptService, StockReceiptService>();
+builder.Services.AddScoped<IExpenseService, ExpenseService>();
+builder.Services.AddScoped<IStatisticsService, StatisticsService>();
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();

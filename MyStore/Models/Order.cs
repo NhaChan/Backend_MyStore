@@ -38,5 +38,6 @@ namespace MyStore.Models
 
         public ICollection<OrderDetail> OrderDetails { get; } = new HashSet<OrderDetail>();
 
+        public DateTime DateReceived { get; set; }
     }
 }

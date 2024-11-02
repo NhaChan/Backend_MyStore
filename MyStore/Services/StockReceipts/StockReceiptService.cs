@@ -112,5 +112,39 @@ namespace MyStore.Services.StockReceipts
             }
             throw new InvalidOperationException(ErrorMessage.NOT_FOUND);
         }
+
+        public async Task<ExpenseReponse> GetExpenseDate(DateTime from, DateTime to)
+        {
+            var result = await _stockReceiptRepository.GetAsync(e => e.EntryDate >= from && e.EntryDate <= to.AddDays(1));
+
+            var expenseList = result.Select(e => new StockReceiptDTO
+            {
+                Id = e.Id,
+                UserName = e.User?.UserName ?? "",
+                Note = e.Note,
+                Total = e.Total,
+                EntryDate = e.EntryDate,
+                CreatedAt = e.CreatedAt
+            }).ToList();
+
+            var totalExpense = expenseList.Sum(e => e.Total);
+
+            return new ExpenseReponse
+            {
+                ExpenseList = expenseList,
+                Total = totalExpense,
+            };
+        }
+
+        public async Task<ExpenseYearMonthReponse> GetExpenseYearMonth(int year, int? month)
+        {
+            var result = await _stockReceiptRepository.GetExpenseByMonthYear(year, month);
+
+            return new ExpenseYearMonthReponse
+            {
+                ExpenseList = result,
+                Total = result.Sum(e => e.Total),
+            };
+        }
     }
 }

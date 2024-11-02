@@ -9,5 +9,8 @@ namespace MyStore.Services.StockReceipts
         Task<StockReceiptDTO> CreateStockReceipt(string userId, StockReceiptRequest request);
         Task<PagedResponse<StockReceiptDTO>> GetAllStock(int page, int pageSize, string?search);
         Task<IEnumerable<StockReceiptDetailResponse>> GetStockDetails(long stockId);
+
+        Task<ExpenseReponse> GetExpenseDate(DateTime from, DateTime to);
+        Task<ExpenseYearMonthReponse> GetExpenseYearMonth(int year, int? month);
     }
 }

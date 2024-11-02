@@ -3,6 +3,7 @@ using Microsoft.Extensions.Caching.Memory;
 using MyStore.Constant;
 using MyStore.DTO;
 using MyStore.Enumerations;
+using MyStore.Migrations;
 using MyStore.Models;
 using MyStore.Repository.CartItemRepository;
 using MyStore.Repository.OrderRepository;
@@ -311,9 +312,13 @@ namespace MyStore.Services.Orders
             if (order != null)
             {
                 if (!order.OrderStatus.Equals(DeliveryStatusEnum.Canceled)
-                    || !order.OrderStatus.Equals(DeliveryStatusEnum.Received))
+                    || !order.OrderStatus.Equals(DeliveryStatusEnum.Finish))
                 {
                     order.OrderStatus += 1;
+                    if (order.OrderStatus == DeliveryStatusEnum.Received)
+                    {
+                        order.DateReceived = DateTime.Now;
+                    }
                     await _orderRepository.UpdateAsync(order);
                 }
                 else throw new Exception(ErrorMessage.ERROR);
@@ -361,7 +366,7 @@ namespace MyStore.Services.Orders
             var order = await _orderRepository.FindAsync(orderId);
             if (order != null)
             {
-                if (!order.OrderStatus.Equals(DeliveryStatusEnum.Received) || !order.OrderStatus.Equals(DeliveryStatusEnum.Canceled))
+                if (!order.OrderStatus.Equals(DeliveryStatusEnum.Finish) || !order.OrderStatus.Equals(DeliveryStatusEnum.Canceled))
                 {
                     order.OrderStatus += 1;
                     await _orderRepository.UpdateAsync(order);
@@ -543,7 +548,7 @@ namespace MyStore.Services.Orders
             {
                 var order = await _orderRepository.SingleOrDefaultAsync(e => e.Id == orderId && e.UserId == userId)
                     ?? throw new InvalidOperationException(ErrorMessage.ORDER_NOT_FOUND);
-                if(order.OrderStatus != DeliveryStatusEnum.Received)
+                if(order.OrderStatus != DeliveryStatusEnum.Received && order.OrderStatus != DeliveryStatusEnum.Finish)
                 {
                     throw new InvalidDataException("Bạn chưa thể đánh giá đơn hàng này!");
                 }
@@ -595,5 +600,41 @@ namespace MyStore.Services.Orders
                 throw;
             }
         }
+
+        public async Task<SalesRespose> GetSaleDate(DateTime from, DateTime to)
+        {
+            var result = await _orderRepository.GetAsync(e => e.DateReceived >= from && e.DateReceived <= to.AddDays(1) 
+                && (e.OrderStatus == DeliveryStatusEnum.Received || e.OrderStatus == DeliveryStatusEnum.Finish));
+
+            var saleList = result.Select(e => new OrderDTO
+            {
+                Id = e.Id,
+                Total = e.Total,
+                PaymentMethodName = e.PaymentMethodName,
+                DateReceived = e.DateReceived,
+
+            }).ToList();
+
+            var totalExpense = saleList.Sum(e => e.Total);
+
+            return new SalesRespose
+            {
+                SaleList = saleList,
+                Total = totalExpense,
+            };
+        }
+
+        public async Task<SalesResposeYearMonth> GetSaleYearMonth(int year, int? month)
+        {
+            var result = await _orderRepository.GetSaleByMonthYear(year, month);
+
+            return new SalesResposeYearMonth
+            {
+                SaleList = result,
+                Total = result.Sum(e => e.Total),
+            };
+        }
     }
+
+    
 }

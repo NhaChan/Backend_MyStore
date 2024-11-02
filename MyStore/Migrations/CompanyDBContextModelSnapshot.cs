@@ -331,6 +331,9 @@ namespace MyStore.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<DateTime?>("DateReceived")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("DeliveryAddress")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -552,7 +555,7 @@ namespace MyStore.Migrations
                     b.Property<string>("ImagesUrlsJson")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("ProductId")
+                    b.Property<int?>("ProductId")
                         .HasColumnType("int");
 
                     b.Property<int>("Star")
@@ -881,9 +884,7 @@ namespace MyStore.Migrations
                 {
                     b.HasOne("MyStore.Models.Product", "Product")
                         .WithMany("ProductReviews")
-                        .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("ProductId");
 
                     b.HasOne("MyStore.Models.User", "User")
                         .WithMany()

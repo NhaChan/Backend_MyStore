@@ -14,5 +14,6 @@ namespace MyStore.Response
         public double AmountPaid { get; set; }
         public string PaymentMethodName { get; set; }
         public string OrderStatus { get; set; }
+        public DateTime? DateReceived { get; set; }
     }
 }
