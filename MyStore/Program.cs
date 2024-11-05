@@ -32,8 +32,8 @@ using MyStore.Services.StockReceipts;
 using MyStore.Services.Expenses;
 using MyStore.Services.Statistics;
 using MyStore.Services.Reviews;
-using MyStore.Services.Logs;
 using MyStore.Repository.LogRepository;
+using MyStore.Services.LogHistory;
 
 var builder = WebApplication.CreateBuilder(args);
 

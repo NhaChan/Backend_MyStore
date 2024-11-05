@@ -6,7 +6,7 @@ using MyStore.Repository.ProductRepository;
 using MyStore.Repository.StockReceiptRepository;
 using MyStore.Request;
 using MyStore.Response;
-using MyStore.Services.Logs;
+using MyStore.Services.LogHistory;
 using System.Globalization;
 using System.Linq.Expressions;
 
