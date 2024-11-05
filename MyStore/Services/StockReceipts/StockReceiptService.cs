@@ -6,6 +6,7 @@ using MyStore.Repository.ProductRepository;
 using MyStore.Repository.StockReceiptRepository;
 using MyStore.Request;
 using MyStore.Response;
+using MyStore.Services.Logs;
 using System.Globalization;
 using System.Linq.Expressions;
 
@@ -17,13 +18,16 @@ namespace MyStore.Services.StockReceipts
         private readonly IStockReceiptDetailRepository _stockReceiptDetailRepository;
         private readonly IProductRepository _productRepository;
         private readonly IMapper _mapper;
+        private readonly ILogService _logService;
 
-        public StockReceiptService(IStockReceiptRepository stockReceiptRepository, IStockReceiptDetailRepository stockReceiptDetailRepository, IProductRepository productRepository, IMapper mapper)
+        public StockReceiptService(IStockReceiptRepository stockReceiptRepository, IStockReceiptDetailRepository stockReceiptDetailRepository,
+            IProductRepository productRepository, IMapper mapper, ILogService logService)
         {
             _stockReceiptRepository = stockReceiptRepository;
             _stockReceiptDetailRepository = stockReceiptDetailRepository;
             _productRepository = productRepository;
             _mapper = mapper;
+            _logService = logService;
         }
 
         public async Task<StockReceiptDTO> CreateStockReceipt(string userId, StockReceiptRequest request)
@@ -167,6 +171,66 @@ namespace MyStore.Services.StockReceipts
                 ExpenseListProduct = result,
                 Total = result.Sum(e => e.Total),
             };
+        }
+
+        public async Task<StockReceiptDTO> UpdateReceipt(long stockReceiptId, StockReceiptRequest request)
+        {
+            try
+            {
+
+                var receipt = await _stockReceiptRepository.FindAsync(stockReceiptId)
+                    ?? throw new ArgumentException(ErrorMessage.NOT_FOUND);
+
+                var logRequest = new LogRequest
+                {
+                    Note = receipt.Note,
+                    UserId=receipt.UserId,
+                    Total = receipt.Total,
+                    EntryDate = receipt.EntryDate,
+                    StockReceiptId = receipt.Id,
+                    logProducts = (await _stockReceiptDetailRepository
+                .GetAsync(e => e.StockReceiptId == stockReceiptId))
+                .Select(d => new LogProduct
+                {
+                    ProductName = d.Product.Name,
+                    OriginPrice = d.OriginPrice,
+                    Quantity = d.Quantity
+                })
+                .ToList()
+                };
+
+                await _logService.CreatedLog(logRequest);
+
+                receipt.Note = request.Note;
+                receipt.Total = request.Total;
+                receipt.EntryDate = request.EntryDate;
+
+                await _stockReceiptRepository.UpdateAsync(receipt);
+
+                var receiptDetail = await _stockReceiptDetailRepository.GetAsync(e => e.StockReceiptId == stockReceiptId);
+                var listReceiptDetail = new List<StockReceiptDetail>();
+
+                foreach (var item in request.StockReceiptProducts)
+                {
+                    var detail = receiptDetail.FirstOrDefault(d => d.ProductId == item.ProductId);
+
+                    if (detail != null)
+                    {
+
+
+                        detail.Quantity = item.Quantity;
+                        detail.OriginPrice = item.OriginPrice;
+                        listReceiptDetail.Add(detail);
+                    }
+                }
+                await _stockReceiptDetailRepository.UpdateAsync(listReceiptDetail);
+
+                return _mapper.Map<StockReceiptDTO>(receipt);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
         }
     }
 }

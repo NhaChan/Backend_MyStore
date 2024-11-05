@@ -58,5 +58,19 @@ namespace MyStore.Controllers
                 return StatusCode(500, ex.Message);
             }
         }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(long id, [FromBody] StockReceiptRequest request)
+        {
+            try
+            {
+                var result = await _stockReceiptService.UpdateReceipt(id, request);
+                return Ok(result);
+            }
+            catch(Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
     }
 }

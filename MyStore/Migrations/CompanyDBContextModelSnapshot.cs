@@ -321,6 +321,68 @@ namespace MyStore.Migrations
                     b.ToTable("Images");
                 });
 
+            modelBuilder.Entity("MyStore.Models.Log", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("EntryDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Note")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<long>("StockReceiptId")
+                        .HasColumnType("bigint");
+
+                    b.Property<double>("Total")
+                        .HasColumnType("float");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Logs");
+                });
+
+            modelBuilder.Entity("MyStore.Models.LogDetail", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<long>("LogId")
+                        .HasColumnType("bigint");
+
+                    b.Property<double>("OriginPrice")
+                        .HasColumnType("float");
+
+                    b.Property<string>("ProductName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("LogId");
+
+                    b.ToTable("LogDetails");
+                });
+
             modelBuilder.Entity("MyStore.Models.Order", b =>
                 {
                     b.Property<long>("Id")
@@ -808,6 +870,17 @@ namespace MyStore.Migrations
                     b.Navigation("Product");
                 });
 
+            modelBuilder.Entity("MyStore.Models.LogDetail", b =>
+                {
+                    b.HasOne("MyStore.Models.Log", "Log")
+                        .WithMany("LogDetails")
+                        .HasForeignKey("LogId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Log");
+                });
+
             modelBuilder.Entity("MyStore.Models.Order", b =>
                 {
                     b.HasOne("MyStore.Models.DeliveryStatus", null)
@@ -935,6 +1008,11 @@ namespace MyStore.Migrations
             modelBuilder.Entity("MyStore.Models.DeliveryStatus", b =>
                 {
                     b.Navigation("Orders");
+                });
+
+            modelBuilder.Entity("MyStore.Models.Log", b =>
+                {
+                    b.Navigation("LogDetails");
                 });
 
             modelBuilder.Entity("MyStore.Models.Order", b =>

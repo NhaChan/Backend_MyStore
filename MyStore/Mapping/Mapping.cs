@@ -44,6 +44,8 @@ namespace MyStore.Mapping
 
             CreateMap<StockReceiptDetail, StockReceiptDetailResponse>()
                 .ForMember(d => d.ProductName, opt => opt.MapFrom(src => src.Product.Name));
+
+            CreateMap<Log, StockReceiptDTO>();
         }
     }
 }

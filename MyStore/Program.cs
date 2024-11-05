@@ -32,6 +32,8 @@ using MyStore.Services.StockReceipts;
 using MyStore.Services.Expenses;
 using MyStore.Services.Statistics;
 using MyStore.Services.Reviews;
+using MyStore.Services.Logs;
+using MyStore.Repository.LogRepository;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -72,6 +74,7 @@ builder.Services.AddScoped<IStockReceiptService, StockReceiptService>();
 builder.Services.AddScoped<IExpenseService, ExpenseService>();
 builder.Services.AddScoped<IStatisticsService, StatisticsService>();
 builder.Services.AddScoped<IReviewService, ReviewService>();
+builder.Services.AddScoped<ILogService, LogService>();
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
@@ -87,6 +90,8 @@ builder.Services.AddScoped<IProductFavoriteRepository, ProductFavoriteRepository
 builder.Services.AddScoped<IProductReviewRepository, ProductReviewRepository>();
 builder.Services.AddScoped<IStockReceiptRepository, StockReceiptRepository>();
 builder.Services.AddScoped<IStockReceiptDetailRepository, StockReceiptDetailRepository>();
+builder.Services.AddScoped<ILogRepository, LogRepository>();
+builder.Services.AddScoped<ILogDetailRepository, LogDetailRepository>();
 
 builder.Services.Configure<MailSettings>(builder.Configuration.GetSection("MailSettings"));
 builder.Services.AddSingleton<ISendMailService, SendMailService>();

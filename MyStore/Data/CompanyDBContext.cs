@@ -22,6 +22,9 @@ namespace MyStore.Data
         public virtual DbSet<ProductReview> ProductReviews { get; set; }
         public virtual DbSet<StockReceipt> StockReceipts { get; set; }
         public virtual DbSet<StockReceiptDetail> StockReceiptDetails { get; set; }
+        public virtual DbSet<Log> Logs { get; set; }
+        public virtual DbSet<LogDetail> LogDetails { get; set; }
+
 
         private void UpdateTimestamps()
         {
