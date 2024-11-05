@@ -145,8 +145,8 @@ namespace MyStore.Services.Products
                 {
                     throw new ArgumentException(ErrorMessage.INVALID);
                 }
-
-                if(filters.MinPrice != null)
+                
+                if (filters.MinPrice != null)
                 {
                     expression = CombineExpressions(expression, e => (e.Price - (e.Price * (e.Discount / 100))) >= filters.MinPrice);
                 }
@@ -154,7 +154,16 @@ namespace MyStore.Services.Products
                 {
                     expression = CombineExpressions(expression, e => (e.Price - (e.Price * (e.Discount / 100))) <= filters.MaxPrice);
                 }
-                if(filters.Discount != null && filters.Discount == true)
+
+                if (!string.IsNullOrEmpty(filters.search))
+                {
+                    var inputWords = filters.search.Trim().Split(' ').Select(word => word.ToLower());
+
+                    expression = CombineExpressions(expression, e => inputWords.All(word => e.Name.ToLower().Contains(word)));
+                }
+
+
+                if (filters.Discount != null && filters.Discount == true)
                 {
                     expression = CombineExpressions(expression, e => e.Discount > 0);
                 }
@@ -344,5 +353,6 @@ namespace MyStore.Services.Products
                 PageSize = request.pageSize
             };
         }
+
     }
 }

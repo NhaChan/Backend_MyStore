@@ -21,4 +21,22 @@ namespace MyStore.Response
         public int Time { get; set; }
         public double Total { get; set; }
     }
+
+    public class ExpenseByProductReponse
+    {
+        public IEnumerable<StatisticData> ExpenseListProduct { get; set; }
+        public double Total { get; set; }
+    }
+
+    public class SaleByProductReponse
+    {
+        public IEnumerable<StatisticData> SaleListProduct { get; set; }
+        public double Total { get; set; }
+    }
+    public class StatisticProductResponse
+    {
+        public ExpenseByProductReponse Expense { get; set; }
+        public SaleByProductReponse Sale { get; set; }
+        public double Total { get; set; }
+    }
 }

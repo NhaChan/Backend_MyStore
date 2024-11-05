@@ -146,5 +146,27 @@ namespace MyStore.Services.StockReceipts
                 Total = result.Sum(e => e.Total),
             };
         }
+
+        public async Task<ExpenseByProductReponse> GetProductExpenseYear(int productId, int year, int? month)
+        {
+            var result = await _stockReceiptRepository.GetStatisticProductExpenseByYear(productId, year, month);
+
+            return new ExpenseByProductReponse
+            {
+                ExpenseListProduct = result,
+                Total = result.Sum(e => e.Total),
+            };
+        }
+
+        public async Task<ExpenseByProductReponse> GetProductExpenseDate(int productId, DateTime from, DateTime to)
+        {
+            var result = await _stockReceiptRepository.GetStatisticProductExpenseByDate(productId, from, to);
+
+            return new ExpenseByProductReponse
+            {
+                ExpenseListProduct = result,
+                Total = result.Sum(e => e.Total),
+            };
+        }
     }
 }

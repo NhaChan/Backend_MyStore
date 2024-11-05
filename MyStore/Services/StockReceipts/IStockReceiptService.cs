@@ -12,5 +12,7 @@ namespace MyStore.Services.StockReceipts
 
         Task<ExpenseReponse> GetExpenseDate(DateTime from, DateTime to);
         Task<ExpenseYearMonthReponse> GetExpenseYearMonth(int year, int? month);
+        Task<ExpenseByProductReponse> GetProductExpenseYear(int productId, int year, int? month);
+        Task<ExpenseByProductReponse> GetProductExpenseDate(int productId, DateTime from, DateTime to);
     }
 }

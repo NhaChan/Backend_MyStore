@@ -335,9 +335,20 @@ namespace MyStore.Services.Orders
                     || order.OrderStatus.Equals(DeliveryStatusEnum.Confirmed))
                 {
                     order.OrderStatus = DeliveryStatusEnum.Canceled;
+                    
+                    var orderDetail = await _orderDetailRepository.GetAsync(e => e.OrderId == orderId);
 
+                    var listProductUpdate = new List<Product>();
+
+                    foreach(var detail in orderDetail)
+                    {
+                        detail.Product.Sold -= detail.Quantity;
+                        detail.Product.Quantity += detail.Quantity;
+                        listProductUpdate.Add(detail.Product);
+                    }
                     _cache.Remove("Order " + orderId);
                     await _orderRepository.UpdateAsync(order);
+                    await _productRepository.UpdateAsync(listProductUpdate);
                 }
                 else throw new Exception(ErrorMessage.ERROR);
             }
@@ -353,8 +364,19 @@ namespace MyStore.Services.Orders
                 {
                     order.OrderStatus = DeliveryStatusEnum.Canceled;
 
+                    var orderDetail = await _orderDetailRepository.GetAsync(e => e.OrderId == orderId);
+                    var listProductUpdate = new List<Product>();
+
+                    foreach (var detail in orderDetail)
+                    {
+                        detail.Product.Sold -= detail.Quantity;
+                        detail.Product.Quantity += detail.Quantity;
+                        listProductUpdate.Add(detail.Product);
+                    }
+
                     _cache.Remove("Order " + orderId);
                     await _orderRepository.UpdateAsync(order);
+                    await _productRepository.UpdateAsync(listProductUpdate);
                 }
                 else throw new Exception(ErrorMessage.ERROR);
             }
@@ -456,7 +478,7 @@ namespace MyStore.Services.Orders
             int page = request.page, pageSize = request.pageSize;
             string? key = request.search?.ToLower();
 
-            Expression<Func<Order, DateTime?>> sortExpression = e => e.UpdatedAt;
+            Expression<Func<Order, DateTime?>> sortExpression = e => e.CreatedAt;
 
             if(statusEnum == DeliveryStatusEnum.Proccessing)
             {
@@ -500,7 +522,7 @@ namespace MyStore.Services.Orders
             int page = request.page, pageSize = request.pageSize;
             string? key = request.search?.ToLower();
 
-            Expression<Func<Order, DateTime?>> sortExpression = e => e.UpdatedAt;
+            Expression<Func<Order, DateTime?>> sortExpression = e => e.CreatedAt;
 
             if (statusEnum == DeliveryStatusEnum.Proccessing)
             {
@@ -624,6 +646,17 @@ namespace MyStore.Services.Orders
             };
         }
 
+        public async Task<SaleByProductReponse> GetProductSaleDate(int productId, DateTime from, DateTime to)
+        {
+            var result = await _orderRepository.GetStatisticProductSaleByDate(productId, from, to);
+
+            return new SaleByProductReponse
+            {
+                SaleListProduct = result,
+                Total = result.Sum(e => e.Total),
+            };
+        }
+
         public async Task<SalesResposeYearMonth> GetSaleYearMonth(int year, int? month)
         {
             var result = await _orderRepository.GetSaleByMonthYear(year, month);
@@ -631,6 +664,17 @@ namespace MyStore.Services.Orders
             return new SalesResposeYearMonth
             {
                 SaleList = result,
+                Total = result.Sum(e => e.Total),
+            };
+        }
+
+        public async Task<SaleByProductReponse> GetProductSaleYear(int productId, int year, int? month)
+        {
+            var result = await _orderRepository.GetStatisticProductSaleByYear(productId, year, month);
+
+            return new SaleByProductReponse
+            {
+                SaleListProduct = result,
                 Total = result.Sum(e => e.Total),
             };
         }

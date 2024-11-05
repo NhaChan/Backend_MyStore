@@ -63,5 +63,42 @@ namespace MyStore.Repository.StockReceiptRepository
                     .OrderByDescending(orderByDesc)
                     .Paginate(page, pageSize)
                     .Include(e => e.User).ToArrayAsync();
+
+        public async Task<IEnumerable<StatisticData>> GetStatisticProductExpenseByDate(int productId, DateTime from, DateTime to)
+        {
+            return await _dbcontext.StockReceipts
+                .Where(e => e.EntryDate >= from && e.EntryDate <= to.AddDays(1))
+                .SelectMany(r => r.StockReceiptDetails)
+                .Where(p => p.ProductId == productId)
+                .GroupBy(p => p.StockReceipt.EntryDate.Date)
+                .Select(g => new StatisticData
+                {
+                    //Time = g.Key,
+                    Total = g.Sum(p => p.Quantity * p.OriginPrice)
+                }).ToArrayAsync();
+        }
+
+        public async Task<IEnumerable<StatisticData>> GetStatisticProductExpenseByYear(int productId, int year, int? month)
+         => month == null
+                ? await _dbcontext.StockReceipts
+                    .Where(e => e.EntryDate.Year == year)
+                    .SelectMany(r => r.StockReceiptDetails)
+                    .Where(p => p.ProductId == productId)
+                    .GroupBy(p => p.StockReceipt.EntryDate.Month)
+                    .Select(g => new StatisticData
+                    {
+                        Time = g.Key,
+                        Total = g.Sum(p => p.Quantity * p.OriginPrice)
+                    }).ToArrayAsync()
+                : await _dbcontext.StockReceipts
+                    .Where(e => e.EntryDate.Year == year && e.EntryDate.Month == month)
+                    .SelectMany(r => r.StockReceiptDetails)
+                    .Where(p => p.ProductId == productId)
+                    .GroupBy(p => p.StockReceipt.EntryDate.Date)
+                    .Select(g => new StatisticData
+                    {
+                        Time = g.Key.Day,
+                        Total = g.Sum(p => p.Quantity * p.OriginPrice)
+                    }).ToArrayAsync();
     }
 }

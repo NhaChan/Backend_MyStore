@@ -31,6 +31,7 @@ using MyStore.Repository.StockReceiptRepository;
 using MyStore.Services.StockReceipts;
 using MyStore.Services.Expenses;
 using MyStore.Services.Statistics;
+using MyStore.Services.Reviews;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -70,6 +71,7 @@ builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IStockReceiptService, StockReceiptService>();
 builder.Services.AddScoped<IExpenseService, ExpenseService>();
 builder.Services.AddScoped<IStatisticsService, StatisticsService>();
+builder.Services.AddScoped<IReviewService, ReviewService>();
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();

@@ -38,6 +38,24 @@ namespace MyStore.Services.Statistics
             return new StatisticsYearMonthResponse { Expense = expense, Sale = sale, Total = SumTotal };
         }
 
+        public async Task<StatisticProductResponse> GetProductStatisticsByYear(int productId, int year, int? month)
+        {
+            ExpenseByProductReponse expense = await _stockReceiptService.GetProductExpenseYear(productId, year, month);
+            SaleByProductReponse sale = await _orderService.GetProductSaleYear(productId, year, month);
+
+            var SumTotal = sale.Total - expense.Total;
+            return new StatisticProductResponse { Expense = expense, Sale = sale, Total = SumTotal };
+        }
+
+        public async Task<StatisticProductResponse> GetStatisticsProductByDate(int productId, DateTime from, DateTime to)
+        {
+            ExpenseByProductReponse expense = await _stockReceiptService.GetProductExpenseDate(productId, from, to);
+            SaleByProductReponse sale = await _orderService.GetProductSaleDate(productId, from, to);
+
+            var SumTotal = sale.Total - expense.Total;
+            return new StatisticProductResponse { Expense = expense, Sale = sale, Total = SumTotal };
+        }
+
 
     }
 }

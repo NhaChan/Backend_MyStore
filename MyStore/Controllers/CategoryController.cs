@@ -31,11 +31,12 @@ namespace MyStore.Controllers
 
         [HttpPost("create")]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Creat([FromBody] NameRequest request)
+        public async Task<IActionResult> Creat([FromForm] NameRequest request, [FromForm] IFormCollection files)
         {
             try
             {
-                var category = await _categoryService.AddCategoryAsync(request.Name);
+                var image = files.Files.First();
+                var category = await _categoryService.AddCategoryAsync(request.Name, image);
                 return Ok(category);
             }
             catch (Exception ex)
@@ -46,11 +47,12 @@ namespace MyStore.Controllers
 
         [HttpPut("update/{id}")]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Update(int id, [FromBody] NameRequest request)
+        public async Task<IActionResult> Update(int id, [FromForm] NameRequest request, [FromForm] IFormCollection files)
         {
             try
             {
-                var result = await _categoryService.UpdateCategoryAsync(id, request.Name);
+                var image = files.Files.FirstOrDefault();
+                var result = await _categoryService.UpdateCategoryAsync(id, request.Name, image);
                 return Ok(result);
             }
             catch (ArgumentException ex)

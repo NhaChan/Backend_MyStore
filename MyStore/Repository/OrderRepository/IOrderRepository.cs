@@ -9,5 +9,7 @@ namespace MyStore.Repository.OrderRepository
     {
         Task<Order?> SingleOrdefaultAsyncInclude(Expression<Func<Order, bool>> expression);
         Task<IEnumerable<StatisticData>> GetSaleByMonthYear(int year, int? month);
+        Task<IEnumerable<StatisticData>> GetStatisticProductSaleByYear(int productId, int year, int? month);
+        Task<IEnumerable<StatisticData>> GetStatisticProductSaleByDate(int productId, DateTime from, DateTime to);
     }
 }

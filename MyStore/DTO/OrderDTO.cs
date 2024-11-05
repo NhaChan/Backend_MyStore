@@ -20,7 +20,7 @@ namespace MyStore.DTO
 
         public ProductDTO Product { get; set; }
         public bool Reviewed { get; set; }
-        public DateTime? DateReceived { get; set; }
+        public DateTime DateReceived { get; set; }
 
     }
 

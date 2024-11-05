@@ -37,5 +37,33 @@ namespace MyStore.Controllers
                 return StatusCode(500, ex.Message);
             }
         }
+
+        [HttpGet("by-productYear")]
+        public async Task<IActionResult> GetByProductYear(int productId, int year, int? month)
+        {
+            try
+            {
+                var result = await _statisticsService.GetProductStatisticsByYear(productId, year, month);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
+
+        [HttpGet("getStatisticsProductFormTo")]
+        public async Task<IActionResult> GetProduct(int productId, [FromQuery] DateTime from, [FromQuery] DateTime to)
+        {
+            try
+            {
+                var result = await _statisticsService.GetStatisticsProductByDate(productId, from, to);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
     }
 }
