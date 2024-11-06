@@ -81,17 +81,19 @@ namespace MyStore.Services.StockReceipts
             }
             else
             {
-                bool isLong = long.TryParse(search, out long isSearch);
-                DateTime dateSearch;
-                bool isDate = DateTime.TryParseExact(
-                    search,
-                    "HH:mm:ss dd/MM/yyyy",
-                    CultureInfo.InvariantCulture,
-                    DateTimeStyles.None,
-                    out dateSearch);
+                //bool isLong = long.TryParse(search, out long isSearch);
+                //DateTime dateSearch;
+                //bool isDate = DateTime.TryParseExact(
+                //    search,
+                //    "HH:mm:ss dd/MM/yyyy",
+                //    CultureInfo.InvariantCulture,
+                //    DateTimeStyles.None,
+                //    out dateSearch);
 
-                Expression<Func<StockReceipt, bool>> expression = e => e.Id.Equals(isSearch)
-                    || (!isLong && isDate && e.CreatedAt.Date == dateSearch.Date);
+                //Expression<Func<StockReceipt, bool>> expression = e => e.Id.Equals(isSearch)
+                //    || (!isLong && isDate && e.CreatedAt.Date == dateSearch.Date);
+
+                Expression<Func<StockReceipt, bool>> expression = e => e.Id.ToString().Contains(search);
 
                 totalReceipt = await _stockReceiptRepository.CountAsync(expression);
                 stockReceipts = await _stockReceiptRepository.GetPageOrderByDescendingAsync(page, pageSize, expression, e => e.CreatedAt);
@@ -184,7 +186,7 @@ namespace MyStore.Services.StockReceipts
                 var logRequest = new LogRequest
                 {
                     Note = receipt.Note,
-                    UserId=receipt.UserId,
+                    UserId = receipt.UserId,
                     Total = receipt.Total,
                     EntryDate = receipt.EntryDate,
                     StockReceiptId = receipt.Id,
@@ -209,20 +211,29 @@ namespace MyStore.Services.StockReceipts
 
                 var receiptDetail = await _stockReceiptDetailRepository.GetAsync(e => e.StockReceiptId == stockReceiptId);
                 var listReceiptDetail = new List<StockReceiptDetail>();
+                var listProductUpdate = new List<Product>();
 
                 foreach (var item in request.StockReceiptProducts)
                 {
+                    int quantityOld = 0;
+
                     var detail = receiptDetail.FirstOrDefault(d => d.ProductId == item.ProductId);
 
-                    if (detail != null)
-                    {
+                    var product = await _productRepository.SingleOrDefaultAsync(e => e.Id == item.ProductId);
 
+                    if (detail != null && product != null)
+                    {
+                        quantityOld = detail.Quantity;
 
                         detail.Quantity = item.Quantity;
                         detail.OriginPrice = item.OriginPrice;
+
+                        product.Quantity += (item.Quantity - quantityOld);
+                        listProductUpdate.Add(product);
                         listReceiptDetail.Add(detail);
                     }
                 }
+                await _productRepository.UpdateAsync(listProductUpdate);
                 await _stockReceiptDetailRepository.UpdateAsync(listReceiptDetail);
 
                 return _mapper.Map<StockReceiptDTO>(receipt);

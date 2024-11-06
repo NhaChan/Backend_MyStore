@@ -46,6 +46,9 @@ namespace MyStore.Mapping
                 .ForMember(d => d.ProductName, opt => opt.MapFrom(src => src.Product.Name));
 
             CreateMap<Log, StockReceiptDTO>();
+
+            CreateMap<Log, LogDTO>()
+                .ForMember(d => d.UserName, opt => opt.MapFrom(src => src.User.FullName));
         }
     }
 }
