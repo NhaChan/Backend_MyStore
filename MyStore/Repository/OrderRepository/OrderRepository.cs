@@ -34,17 +34,17 @@ namespace MyStore.Repository.OrderRepository
                         Total = g.Sum(e => e.Total)
                     }).ToArrayAsync();
 
-        public async Task<IEnumerable<StatisticData>> GetStatisticProductSaleByDate(int productId, DateTime from, DateTime to)
+        public async Task<IEnumerable<StatisticProduct>> GetStatisticProductSaleByDate(int productId, DateTime from, DateTime to)
         {
             return await _dbContext.Orders
                 .Where(e => e.DateReceived >= from && e.DateReceived <= to.AddDays(1) 
-                       && e.OrderStatus == DeliveryStatusEnum.Received || e.OrderStatus == DeliveryStatusEnum.Finish)
+                       && (e.OrderStatus == DeliveryStatusEnum.Received || e.OrderStatus == DeliveryStatusEnum.Finish))
                 .SelectMany(r => r.OrderDetails)
                 .Where(p => p.ProductId == productId)
                 .GroupBy(p => p.Order.DateReceived.Date)
-                .Select(g => new StatisticData
+                .Select(g => new StatisticProduct
                 {
-                    //Time = g.Key,
+                    Time = g.Key,
                     Total = g.Sum(p => p.Price)
                 }).ToArrayAsync();
         }

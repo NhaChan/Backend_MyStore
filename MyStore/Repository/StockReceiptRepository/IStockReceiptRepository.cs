@@ -8,6 +8,6 @@ namespace MyStore.Repository.StockReceiptRepository
     {
         Task<IEnumerable<StatisticData>> GetExpenseByMonthYear(int year, int? month);
         Task<IEnumerable<StatisticData>> GetStatisticProductExpenseByYear(int productId, int year, int? month);
-        Task<IEnumerable<StatisticData>> GetStatisticProductExpenseByDate(int productId, DateTime from, DateTime to);
+        Task<IEnumerable<StatisticProduct>> GetStatisticProductExpenseByDate(int productId, DateTime from, DateTime to);
     }
 }

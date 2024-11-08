@@ -24,6 +24,6 @@ namespace MyStore.Services.Orders
         Task<SalesRespose> GetSaleDate(DateTime from, DateTime to);
         Task<SalesResposeYearMonth> GetSaleYearMonth(int year, int? month);
         Task<SaleByProductReponse> GetProductSaleYear(int productId, int year, int? month);
-        Task<SaleByProductReponse> GetProductSaleDate(int productId, DateTime from, DateTime to);
+        Task<SaleProductReponse> GetProductSaleDate(int productId, DateTime from, DateTime to);
     }
 }

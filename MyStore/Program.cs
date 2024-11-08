@@ -116,6 +116,8 @@ builder.Services.AddAuthentication(option =>
     };
 });
 
+
+
 builder.Services.AddAutoMapper(typeof(Mapping));
 
 builder.Services.AddCors(opt =>

@@ -646,13 +646,13 @@ namespace MyStore.Services.Orders
             };
         }
 
-        public async Task<SaleByProductReponse> GetProductSaleDate(int productId, DateTime from, DateTime to)
+        public async Task<SaleProductReponse> GetProductSaleDate(int productId, DateTime from, DateTime to)
         {
             var result = await _orderRepository.GetStatisticProductSaleByDate(productId, from, to);
 
-            return new SaleByProductReponse
+            return new SaleProductReponse
             {
-                SaleListProduct = result,
+                SaleList = result,
                 Total = result.Sum(e => e.Total),
             };
         }

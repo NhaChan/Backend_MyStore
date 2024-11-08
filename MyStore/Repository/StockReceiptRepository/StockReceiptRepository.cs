@@ -64,16 +64,16 @@ namespace MyStore.Repository.StockReceiptRepository
                     .Paginate(page, pageSize)
                     .Include(e => e.User).ToArrayAsync();
 
-        public async Task<IEnumerable<StatisticData>> GetStatisticProductExpenseByDate(int productId, DateTime from, DateTime to)
+        public async Task<IEnumerable<StatisticProduct>> GetStatisticProductExpenseByDate(int productId, DateTime from, DateTime to)
         {
             return await _dbcontext.StockReceipts
-                .Where(e => e.EntryDate >= from && e.EntryDate <= to.AddDays(1))
+                .Where(e => e.EntryDate >= from && e.EntryDate <= to)
                 .SelectMany(r => r.StockReceiptDetails)
                 .Where(p => p.ProductId == productId)
                 .GroupBy(p => p.StockReceipt.EntryDate.Date)
-                .Select(g => new StatisticData
+                .Select(g => new StatisticProduct
                 {
-                    //Time = g.Key,
+                    Time = g.Key,
                     Total = g.Sum(p => p.Quantity * p.OriginPrice)
                 }).ToArrayAsync();
         }

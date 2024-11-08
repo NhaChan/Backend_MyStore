@@ -47,13 +47,13 @@ namespace MyStore.Services.Statistics
             return new StatisticProductResponse { Expense = expense, Sale = sale, Total = SumTotal };
         }
 
-        public async Task<StatisticProductResponse> GetStatisticsProductByDate(int productId, DateTime from, DateTime to)
+        public async Task<ProductStatisticResponse> GetStatisticsProductByDate(int productId, DateTime from, DateTime to)
         {
-            ExpenseByProductReponse expense = await _stockReceiptService.GetProductExpenseDate(productId, from, to);
-            SaleByProductReponse sale = await _orderService.GetProductSaleDate(productId, from, to);
+            ExpenseProductReponse expense = await _stockReceiptService.GetProductExpenseDate(productId, from, to);
+            SaleProductReponse sale = await _orderService.GetProductSaleDate(productId, from, to);
 
             var SumTotal = sale.Total - expense.Total;
-            return new StatisticProductResponse { Expense = expense, Sale = sale, Total = SumTotal };
+            return new ProductStatisticResponse { Expense = expense, Sale = sale, Total = SumTotal };
         }
 
 

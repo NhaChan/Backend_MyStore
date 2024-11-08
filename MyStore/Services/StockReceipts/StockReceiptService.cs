@@ -164,13 +164,13 @@ namespace MyStore.Services.StockReceipts
             };
         }
 
-        public async Task<ExpenseByProductReponse> GetProductExpenseDate(int productId, DateTime from, DateTime to)
+        public async Task<ExpenseProductReponse> GetProductExpenseDate(int productId, DateTime from, DateTime to)
         {
             var result = await _stockReceiptRepository.GetStatisticProductExpenseByDate(productId, from, to);
 
-            return new ExpenseByProductReponse
+            return new ExpenseProductReponse
             {
-                ExpenseListProduct = result,
+                ExpenseList = result,
                 Total = result.Sum(e => e.Total),
             };
         }
