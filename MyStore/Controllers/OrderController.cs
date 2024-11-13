@@ -215,7 +215,6 @@ namespace MyStore.Controllers
         }
 
         [HttpGet("user/{status}")]
-        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetWithOrderStatusUser(DeliveryStatusEnum status, [FromQuery] PageRequest request)
         {
             try

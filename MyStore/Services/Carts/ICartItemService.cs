@@ -10,5 +10,10 @@ namespace MyStore.Services.Carts
         //Task DeleteCartAsync (string userId, string cartId);
         Task DeleteCartAsync(string userId, IEnumerable<int> productId);
         Task <CartItemResponse> UpdateCartItem(string userId, string cartId, UpdateCartRequest request);
+
+        Task<int> GetCount(string userId);
+        Task<IEnumerable<int>> GetCountProdutctId(string userId);
+
+        Task DeleteCart(string cartId, string userId);
     }
 }

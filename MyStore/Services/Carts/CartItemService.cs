@@ -113,5 +113,28 @@ namespace MyStore.Services.Carts
                 throw new Exception(ex.Message);
             }
         }
+
+        public async Task<int> GetCount(string userId)
+        {
+
+            var cart = await _cartItemRepository.CountAsync(e => e.UserId == userId);
+            return cart;
+        }
+
+        public async Task<IEnumerable<int>> GetCountProdutctId(string userId)
+        {
+            var cart = await _cartItemRepository.GetAsync(e => e.UserId == userId);
+            return cart.Select(e => e.ProductId);
+        }
+
+        public async Task DeleteCart(string cartId, string userId)
+        {
+            var cartItem = await _cartItemRepository.SingleOrDefaultAsync(e => e.Id == cartId && e.UserId == userId);
+            if (cartItem != null)
+            {
+                await _cartItemRepository.DeleteAsync(cartItem);
+            }
+            else throw new Exception(ErrorMessage.NOT_FOUND);
+        }
     }
 }

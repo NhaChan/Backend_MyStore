@@ -16,5 +16,9 @@ namespace MyStore.Services.Users
         Task<PagedResponse<ProductDTO>> GetProductFavorite(string userId, PageRequest request);
         Task<IEnumerable<int>> GetFavorites(string userId);
 
+        Task<UserDTO> UpdateAvt(string userId, IFormFile image);
+
+        Task<ImageDTO> GetImage(string userId);
+
     }
 }

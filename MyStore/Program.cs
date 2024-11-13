@@ -34,6 +34,8 @@ using MyStore.Services.Statistics;
 using MyStore.Services.Reviews;
 using MyStore.Repository.LogRepository;
 using MyStore.Services.LogHistory;
+using MyStore.Chats.Message;
+using MyStore.Chats;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -95,6 +97,7 @@ builder.Services.AddScoped<ILogDetailRepository, LogDetailRepository>();
 
 builder.Services.Configure<MailSettings>(builder.Configuration.GetSection("MailSettings"));
 builder.Services.AddSingleton<ISendMailService, SendMailService>();
+builder.Services.AddSingleton<IMessageMannager, MessageMannager>();
 
 
 builder.Services.AddAuthentication(option =>
@@ -114,11 +117,30 @@ builder.Services.AddAuthentication(option =>
         ValidIssuer = builder.Configuration.GetSection("JWT:Issuer").Value,
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(builder.Configuration.GetSection("JWT:Key").Value ?? ""))
     };
+
+    //chat
+    option.Events = new JwtBearerEvents()
+    {
+        OnMessageReceived = context =>
+        {
+            var token = context.Request.Query["access_token"];
+
+            var path = context.HttpContext.Request.Path;
+            if (!string.IsNullOrEmpty(token) && path.StartsWithSegments("/chat"))
+            {
+                context.Token = token;
+            }
+            return Task.CompletedTask;
+        }
+    };
 });
 
-
-
 builder.Services.AddAutoMapper(typeof(Mapping));
+
+builder.Services.AddSignalR();
+
+
+builder.Services.AddMemoryCache();
 
 builder.Services.AddCors(opt =>
 {
@@ -148,6 +170,8 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.UseStaticFiles();
+
+app.MapHub<ChatBox>("/chat");
 
 app.MapControllers();
 

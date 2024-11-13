@@ -12,6 +12,8 @@ namespace MyStore.Mapping
         { 
             CreateMap<User, UserDTO>().ReverseMap();
             CreateMap<User, UserResponse>().ReverseMap();
+            CreateMap<User, ImageDTO>();
+
             CreateMap<Category, CategoryDTO>().ReverseMap();
             CreateMap<Brand, BrandDTO>().ReverseMap();
             CreateMap<ProductRequest, Product>().ReverseMap();

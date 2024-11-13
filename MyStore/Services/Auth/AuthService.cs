@@ -191,6 +191,7 @@ namespace MyStore.Services.Auth
                         Access_token = accessToken,
                         Refresh_token = refreshToken,
                         FullName = user.FullName,
+                        PhoneNumber = user.PhoneNumber,
                         Roles = roles,
 
                     };

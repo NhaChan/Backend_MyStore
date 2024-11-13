@@ -7,6 +7,7 @@ using MyStore.DTO;
 using MyStore.Constant;
 using MyStore.Repository.ProductRepository;
 using MyStore.Request;
+using MyStore.Storage;
 
 namespace MyStore.Services.Users
 {
@@ -17,16 +18,19 @@ namespace MyStore.Services.Users
         private readonly IMapper _mapper;
         private readonly IDeliveryAdressRepository _deliveryAdressRepository;
         private readonly IProductFavoriteRepository _productFavoriteRepository;
+        private readonly IFileStorage _fileStorage;
+        private readonly string path = "assets/images/avatars";
 
         public UserService(UserManager<User> userManager, IUserRepository userRepository,
             IMapper mapper, IDeliveryAdressRepository deliveryAdressRepository,
-            IProductFavoriteRepository productFavoriteRepository)
+            IProductFavoriteRepository productFavoriteRepository, IFileStorage fileStorage)
         {
             _userManager = userManager;
             _userRepository = userRepository;
             _mapper = mapper;
             _deliveryAdressRepository = deliveryAdressRepository;
             _productFavoriteRepository = productFavoriteRepository;
+            _fileStorage = fileStorage;
         }
 
         public async Task AddProductFavorite(string userId, int productId)
@@ -41,13 +45,13 @@ namespace MyStore.Services.Users
 
         public async Task DeleteProductFavotite(string userId, int productId)
             => await _productFavoriteRepository.DeleteAsync(userId, productId);
-        
+
 
         public async Task<PagedResponse<UserResponse>> GetAllUserAsync(int page, int pageSize, string? keySearch)
         {
             int totalUser;
             IList<User> users;
-            if(keySearch == null)
+            if (keySearch == null)
             {
                 totalUser = await _userRepository.CountAsync();
                 users = (await _userRepository.GetAllUserAsync(page, pageSize)).ToList();
@@ -66,7 +70,7 @@ namespace MyStore.Services.Users
             //        PhoneNumber = x.PhoneNumber,
             //    });
             var items = _mapper.Map<IList<UserResponse>>(users);
-            for (int i=0; i < users.Count(); i++)
+            for (int i = 0; i < users.Count(); i++)
             {
                 var roles = await _userManager.GetRolesAsync(users[i]);
                 if (roles != null)
@@ -88,6 +92,16 @@ namespace MyStore.Services.Users
         {
             var favorites = await _productFavoriteRepository.GetAsync(e => e.UserId == userId);
             return favorites.Select(e => e.ProductId);
+        }
+
+        public async Task<ImageDTO> GetImage(string userId)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if(user != null)
+            {
+                return _mapper.Map<ImageDTO>(user);
+            }
+            else { throw new ArgumentException(ErrorMessage.NOT_FOUND); }
         }
 
         public async Task<PagedResponse<ProductDTO>> GetProductFavorite(string userId, PageRequest request)
@@ -119,7 +133,7 @@ namespace MyStore.Services.Users
         public async Task<AddressDTO?> GetUserAddress(string userId)
         {
             var delivery = await _deliveryAdressRepository.SingleOrDefaultAsync(e => e.User.Id == userId);
-            if(delivery != null)
+            if (delivery != null)
             {
                 return _mapper.Map<AddressDTO>(delivery);
             }
@@ -129,12 +143,34 @@ namespace MyStore.Services.Users
         public async Task<UserDTO> GetUserInfo(string userId)
         {
             var user = await _userManager.FindByIdAsync(userId);
-            if(user != null)
+            if (user != null)
             {
                 var res = _mapper.Map<UserDTO>(user);
                 return res;
             }
             throw new InvalidOperationException(ErrorMessage.NOT_FOUND_USER);
+        }
+
+        public async Task<UserDTO> UpdateAvt(string userId, IFormFile image)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user != null)
+            {
+                if (user.ImageUrl != null)
+                {
+                    _fileStorage.Delete(user.ImageUrl);
+                }
+
+                string fileName = Guid.NewGuid().ToString() + Path.GetExtension(image.FileName);
+                user.ImageUrl = Path.Combine(path, fileName);
+
+                await _fileStorage.SaveAsync(path, image, fileName);
+
+                await _userManager.UpdateAsync(user);
+
+                return _mapper.Map<UserDTO>(user);
+            }
+            else { throw new ArgumentException(ErrorMessage.NOT_FOUND); }
         }
 
         public async Task<AddressDTO?> UpdateUserAddress(string userId, AddressDTO address)
@@ -155,7 +191,7 @@ namespace MyStore.Services.Users
                     delivery.WardName = address.WardName;
 
                     await _deliveryAdressRepository.UpdateAsync(delivery);
-                    
+
                 }
                 else
                 {

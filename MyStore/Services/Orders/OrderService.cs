@@ -529,25 +529,25 @@ namespace MyStore.Services.Orders
                 sortExpression = e => e.CreatedAt;
             }
 
-            if (string.IsNullOrEmpty(key))
-            {
+            //if (string.IsNullOrEmpty(key))
+            //{
                 totalOrder = await _orderRepository.CountAsync(e => e.UserId == userId && e.OrderStatus == statusEnum);
                 orders = await _orderRepository.GetPageOrderByDescendingAsync(page, pageSize, x => x.UserId == userId && x.OrderStatus == statusEnum, sortExpression);
-            }
+            //}
 
-            else
-            {
-                bool isLong = long.TryParse(key, out long idSearch);
+            //else
+            //{
+            //    bool isLong = long.TryParse(key, out long idSearch);
 
-                Expression<Func<Order, bool>> expression =
-                    e => e.OrderStatus == statusEnum &&
-                    e.UserId == userId &&
-                    (isLong && e.Id.Equals(idSearch) ||
-                    e.PaymentMethodName.ToLower().Contains(key));
+            //    Expression<Func<Order, bool>> expression =
+            //        e => e.OrderStatus == statusEnum &&
+            //        e.UserId == userId &&
+            //        (isLong && e.Id.Equals(idSearch) ||
+            //        e.PaymentMethodName.ToLower().Contains(key));
 
-                totalOrder = await _orderRepository.CountAsync(expression);
-                orders = await _orderRepository.GetPageOrderByDescendingAsync(page, pageSize, expression, sortExpression);
-            }
+            //    totalOrder = await _orderRepository.CountAsync(expression);
+            //    orders = await _orderRepository.GetPageOrderByDescendingAsync(page, pageSize, expression, sortExpression);
+            //}
 
             var items = _mapper.Map<IEnumerable<OrderDTO>>(orders);
             foreach (var item in items)

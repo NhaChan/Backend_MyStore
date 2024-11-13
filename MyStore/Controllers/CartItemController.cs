@@ -80,6 +80,31 @@ namespace MyStore.Controllers
             }
         }
 
+        [HttpDelete("delete/{id}")]
+        public async Task<IActionResult> Delete(string id)
+        {
+            try
+            {
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (userId == null)
+                {
+                    return Unauthorized();
+                }
+                await _cartItemService.DeleteCart(id, userId);
+                return NoContent();
+            }
+            catch (ArgumentException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
+
+
+
         [HttpPut("update/{id}")]
         public async Task<IActionResult> Update(string id, [FromBody] UpdateCartRequest request)
         {
@@ -96,6 +121,25 @@ namespace MyStore.Controllers
             catch (ArgumentException ex)
             {
                 return NotFound(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
+
+        [HttpGet("count-cart")]
+        public async Task<IActionResult> GetCount()
+        {
+            try
+            {
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (userId == null)
+                {
+                    return Unauthorized();
+                }
+                var carts = await _cartItemService.GetCountProdutctId(userId);
+                return Ok(carts);
             }
             catch (Exception ex)
             {

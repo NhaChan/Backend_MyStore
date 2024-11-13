@@ -11,6 +11,7 @@ namespace MyStore.Controllers
 {
     [Route("api/user")]
     [ApiController]
+    [Authorize]
     public class UsersController : ControllerBase
     {
         private readonly IUserService _userService;
@@ -206,6 +207,45 @@ namespace MyStore.Controllers
                 return Ok(productFavorite);
             }
             catch(Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
+
+        [HttpPut("avatar")]
+        public async Task<IActionResult> UpdateAvt([FromForm] IFormCollection file)
+        {
+            try
+            {
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (userId == null)
+                {
+                    return Unauthorized();
+                }
+                var image = file.Files.FirstOrDefault();
+                var result = await _userService.UpdateAvt(userId, image);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
+
+        [HttpGet("avatar")]
+        public async Task<IActionResult> GetImage()
+        {
+            try
+            {
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (userId == null)
+                {
+                    return Unauthorized();
+                }
+                var result = await _userService.GetImage(userId);
+                return Ok(result);
+            }
+            catch (Exception ex)
             {
                 return StatusCode(500, ex.Message);
             }

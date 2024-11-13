@@ -67,7 +67,7 @@ namespace MyStore.Repository.StockReceiptRepository
         public async Task<IEnumerable<StatisticProduct>> GetStatisticProductExpenseByDate(int productId, DateTime from, DateTime to)
         {
             return await _dbcontext.StockReceipts
-                .Where(e => e.EntryDate >= from && e.EntryDate <= to)
+                .Where(e => e.EntryDate >= from && e.EntryDate <= to.AddDays(1))
                 .SelectMany(r => r.StockReceiptDetails)
                 .Where(p => p.ProductId == productId)
                 .GroupBy(p => p.StockReceipt.EntryDate.Date)
