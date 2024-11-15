@@ -1,8 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using MyStore.Data;
 using MyStore.DTO;
+using MyStore.Enumerations;
 using MyStore.Request;
 using MyStore.Services.Users;
 using System.Security.Claims;
@@ -11,7 +10,7 @@ namespace MyStore.Controllers
 {
     [Route("api/user")]
     [ApiController]
-    [Authorize]
+    //[Authorize]
     public class UsersController : ControllerBase
     {
         private readonly IUserService _userService;
@@ -21,12 +20,12 @@ namespace MyStore.Controllers
             _userService = userService;
         }
         [HttpGet]
-        //[Authorize(Roles = "Admin")]
-        public async Task<IActionResult> GetAllUser([FromQuery] PageRequest request)
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> GetAllUser([FromQuery] PageRequest request, [FromQuery] RolesEnum roles)
         {
             try
             {
-                return Ok(await _userService.GetAllUserAsync(request.page, request.pageSize, request.search));
+                return Ok(await _userService.GetAllUserAsync(request.page, request.pageSize, request.search, roles));
             }
             catch (Exception ex)
             {
@@ -250,5 +249,79 @@ namespace MyStore.Controllers
                 return StatusCode(500, ex.Message);
             }
         }
+
+        [HttpPost("add")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> AddUser([FromBody] UserCreateDTO user)
+        {
+            try
+            {
+                var result = await _userService.AddUser(user);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(string id)
+        {
+            try
+            {
+                await _userService.DeleteUser(id);
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
+
+
+        [HttpPut("update/{id}")]
+        //[Authorize(Roles = "Admin")]
+        public async Task<IActionResult> UpdateUser(string id, [FromBody] UserUpdateDTO user)
+        {
+            try
+            {
+                var result = await _userService.UpdateUser(id, user);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(string id)
+        {
+            try
+            {
+                var result = await _userService.GetUserId(id);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
+
+        [HttpPut("lock/{id}")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> LockOut(string id, [FromBody] LockOutRequest request)
+        {
+            try
+            {
+                await _userService.LockOut(id, request.EndDate);
+                return NoContent();
+            }
+            catch(Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        } 
     }
 }

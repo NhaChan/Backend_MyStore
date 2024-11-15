@@ -2,10 +2,12 @@
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using MyStore.Models;
+using System.Data;
 
 namespace MyStore.Data
 {
-    public class CompanyDBContext : IdentityDbContext<User>
+    public class CompanyDBContext : IdentityDbContext<User, Role, string, IdentityUserClaim<string>, UserRole,
+        IdentityUserLogin<string>, IdentityRoleClaim<string>, IdentityUserToken<string>>
     {
         public CompanyDBContext(DbContextOptions<CompanyDBContext> options) : base(options) { }
         public virtual DbSet<Brand> Brands { get; set; }
@@ -26,18 +28,37 @@ namespace MyStore.Data
         public virtual DbSet<LogDetail> LogDetails { get; set; }
 
 
+        protected override void OnModelCreating(ModelBuilder builder)
+        {
+            base.OnModelCreating(builder);
+            builder.Entity<User>(e =>
+            {
+                e.HasMany(x => x.UserRoles)
+                .WithOne(x => x.User)
+                .HasForeignKey(x => x.UserId)
+                .IsRequired();
+            });
+            builder.Entity<Role>(e =>
+            {
+                e.HasMany(x => x.UserRoles)
+                .WithOne(x => x.Role)
+                .HasForeignKey(x => x.RoleId)
+                .IsRequired();
+            });
+        }
+
         private void UpdateTimestamps()
         {
             var entries = ChangeTracker.Entries()
-                .Where(e => e.Entity is IBaseEntity 
+                .Where(e => e.Entity is IBaseEntity
                 && (e.State == EntityState.Added || e.State == EntityState.Modified));
             foreach (var entry in entries)
             {
-                if(entry.State == EntityState.Added)
+                if (entry.State == EntityState.Added)
                 {
                     ((IBaseEntity)entry.Entity).CreatedAt = DateTime.Now;
                 }
-                if(entry.State == EntityState.Modified)
+                if (entry.State == EntityState.Modified)
                 {
                     ((IBaseEntity)entry.Entity).UpdatedAt = DateTime.Now;
                 }

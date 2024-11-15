@@ -12,6 +12,8 @@ using System.Data;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using Microsoft.EntityFrameworkCore;
+using MyStore.Repository.TransactionRepository;
 
 namespace MyStore.Services.Auth
 {
@@ -22,11 +24,13 @@ namespace MyStore.Services.Auth
         private readonly IConfiguration _config;
         private readonly ISendMailService _emailSender;
         private readonly ICachingService _cachingService;
+        private readonly ITransactionRepository _transactionRepository;
 
-        public AuthService(SignInManager<User> signInManager, UserManager<User> userManager, 
-            IConfiguration config, 
+        public AuthService(SignInManager<User> signInManager, UserManager<User> userManager,
+            IConfiguration config,
             ISendMailService emailSender,
-            ICachingService cachingService
+            ICachingService cachingService,
+            ITransactionRepository transactionRepository
             )
         {
             _signInManager = signInManager;
@@ -34,6 +38,7 @@ namespace MyStore.Services.Auth
             _config = config;
             _emailSender = emailSender;
             _cachingService = cachingService;
+            _transactionRepository = transactionRepository;
         }
 
         //private async Task<string> CreateJWT(User user, DateTime time, bool RefreshToken)
@@ -207,18 +212,40 @@ namespace MyStore.Services.Auth
 
             if (isTokenValid)
             {
-                var User = new User()
+                using (var transaction = await _transactionRepository.BeginTransactionAsync())
                 {
-                    Email = request.Email,
-                    NormalizedEmail = request.Email,
-                    UserName = request.Email,
-                    NormalizedUserName = request.Email,
-                    PhoneNumber = request.PhoneNumber,
-                    FullName = request.Name,
-                    SecurityStamp = Guid.NewGuid().ToString(),
-                    ConcurrencyStamp = Guid.NewGuid().ToString()
-                };
-                return await _userManager.CreateAsync(User, request.Password);
+                    try
+                    {
+                        var User = new User()
+                        {
+                            Email = request.Email,
+                            NormalizedEmail = request.Email,
+                            UserName = request.Email,
+                            NormalizedUserName = request.Email,
+                            PhoneNumber = request.PhoneNumber,
+                            FullName = request.Name,
+                            SecurityStamp = Guid.NewGuid().ToString(),
+                            ConcurrencyStamp = Guid.NewGuid().ToString()
+                        };
+                        var result = await _userManager.CreateAsync(User, request.Password);
+                        if (!result.Succeeded)
+                        {
+                            throw new Exception(ErrorMessage.INVALID);
+                        }
+                        var resultRole = await _userManager.AddToRoleAsync(User, "User");
+                        if (!resultRole.Succeeded)
+                        {
+                            throw new Exception(ErrorMessage.INVALID);
+                        }
+
+                        await _transactionRepository.CommitTransactionAsync();
+                        return IdentityResult.Success;
+                    } catch (Exception ex)
+                    {
+                        await _transactionRepository.RollbackTransactionAsync();
+                        throw new Exception(ErrorMessage.INVALID);
+                    }
+                }
             }
             else throw new Exception("Invalid reset token.");
         }
@@ -271,7 +298,7 @@ namespace MyStore.Services.Auth
             if (cachedToken == null || cachedToken != token) return false;
             else return true;
         }
-        
+
         public async Task<bool> ResetPasswordAsync(string email, string token, string newPassword)
         {
             var isTokenValid = VerifyResetToken(email, token);

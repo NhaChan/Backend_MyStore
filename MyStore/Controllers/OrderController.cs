@@ -101,7 +101,7 @@ namespace MyStore.Controllers
         }
 
         [HttpPut("{id}")]
-        [Authorize(Roles = "Admin")]
+        //[Authorize(Roles = "Admin")]
         public async Task<IActionResult> UpdateOrderStatus(long id, OrderStatusRequest request)
         {
             try

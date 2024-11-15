@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using MyStore.Data;
+using MyStore.Enumerations;
 using MyStore.Models;
 using System.Data;
 
@@ -12,8 +13,8 @@ namespace MyStore.DataSeeding
         {
             using var scope = serviceProvider.CreateAsyncScope();
             var context = scope.ServiceProvider.GetRequiredService<CompanyDBContext>();
-            
-            if(context != null)
+
+            if (context != null)
             {
                 try
                 {
@@ -31,41 +32,43 @@ namespace MyStore.DataSeeding
         }
         private static async Task InitialRoles(IServiceProvider serviceProvider, CompanyDBContext context)
         {
-            var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-
-            string[] roles = { "Admin" };
-
-            foreach (string role in roles)
+            var roleManager = serviceProvider.GetRequiredService<RoleManager<Role>>();
+            foreach (string role in Enum.GetNames(typeof(RolesEnum)))
             {
                 if (!context.Roles.Any(r => r.Name == role))
                 {
-                    await roleManager.CreateAsync(new IdentityRole(role));
+                    await roleManager.CreateAsync(new Role
+                    {
+                        Name = role,
+                        NormalizedName = role.ToUpper(),
+                    });
                 }
             }
-            await InitialUsers(serviceProvider, context, roles);
+            await InitialUsers(serviceProvider, context);
         }
 
-        private static async Task InitialUsers(IServiceProvider serviceProvider, CompanyDBContext context, string[] roles)
+        private static async Task InitialUsers(IServiceProvider serviceProvider, CompanyDBContext context)
         {
             var userManager = serviceProvider.GetRequiredService<UserManager<User>>();
-            var user = new User
+            var adminEmail = "lethinhachan18@gmail.com";
+            var admin = new User
             {
-                FullName = "Nhã Chân",
-                Email = "lethinhachan18@gmail.com",
-                NormalizedEmail = "lethinhachan18@gmail.com",
-                UserName = "lethinhachan18@gmail.com",
-                NormalizedUserName = "lethinhachan18@gmail.com",
+                FullName = "Lê Thị Nhã Chân",
+                Email = adminEmail,
+                NormalizedEmail = adminEmail.ToUpper(),
+                UserName = adminEmail,
+                NormalizedUserName = adminEmail.ToUpper(),
                 PhoneNumber = "0901089182",
-                //PhoneNumberConfirmed = true,
+                PhoneNumberConfirmed = true,
                 SecurityStamp = Guid.NewGuid().ToString(),
             };
-
-            if(!context.Users.Any(u => u.UserName == user.UserName))
+            
+            if (!context.Users.Any(u => u.UserName == admin.UserName))
             {
-                var result = await userManager.CreateAsync(user, "Chan@123");
-                if(result.Succeeded)
+                var result = await userManager.CreateAsync(admin, "Chan@123");
+                if (result.Succeeded)
                 {
-                    await userManager.AddToRolesAsync(user, roles);
+                    await userManager.AddToRoleAsync(admin, RolesEnum.Admin.ToString());
                 }
             }
         }

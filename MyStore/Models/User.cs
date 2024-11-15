@@ -11,5 +11,7 @@ namespace MyStore.Models
         public DateTime? UpdatedAt { get; set; }
 
         public DeliveryAddress? DeliveryAddress { get; set; }
+
+        public virtual ICollection<UserRole> UserRoles { get; set; }
     }
 }

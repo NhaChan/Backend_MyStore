@@ -3,7 +3,6 @@ using Microsoft.Extensions.Caching.Memory;
 using MyStore.Constant;
 using MyStore.DTO;
 using MyStore.Enumerations;
-using MyStore.Migrations;
 using MyStore.Models;
 using MyStore.Repository.CartItemRepository;
 using MyStore.Repository.OrderRepository;

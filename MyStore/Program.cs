@@ -36,6 +36,7 @@ using MyStore.Repository.LogRepository;
 using MyStore.Services.LogHistory;
 using MyStore.Chats.Message;
 using MyStore.Chats;
+using MyStore.Repository.TransactionRepository;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -51,7 +52,7 @@ builder.Services.AddDbContext<CompanyDBContext>(opt =>
     opt.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
 
-builder.Services.AddIdentity<User, IdentityRole>()
+builder.Services.AddIdentity<User, Role>()
     .AddEntityFrameworkStores<CompanyDBContext>()
     .AddTokenProvider("MyStore", typeof(DataProtectorTokenProvider<User>));
 
@@ -94,6 +95,7 @@ builder.Services.AddScoped<IStockReceiptRepository, StockReceiptRepository>();
 builder.Services.AddScoped<IStockReceiptDetailRepository, StockReceiptDetailRepository>();
 builder.Services.AddScoped<ILogRepository, LogRepository>();
 builder.Services.AddScoped<ILogDetailRepository, LogDetailRepository>();
+builder.Services.AddScoped<ITransactionRepository, TransactionRepository>();
 
 builder.Services.Configure<MailSettings>(builder.Configuration.GetSection("MailSettings"));
 builder.Services.AddSingleton<ISendMailService, SendMailService>();
@@ -153,7 +155,7 @@ builder.Services.AddCors(opt =>
 
 var app = builder.Build();
 
-DataSeeding.Initialize(app.Services).Wait();
+//DataSeeding.Initialize(app.Services).Wait();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
