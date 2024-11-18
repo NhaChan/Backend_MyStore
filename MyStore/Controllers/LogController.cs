@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using MyStore.Request;
 using MyStore.Services.LogHistory;
@@ -12,6 +13,7 @@ namespace MyStore.Controllers
         private readonly ILogService _logService = logService;
 
         [HttpGet]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Get([FromQuery] PageRequest request) 
         {
             try
@@ -26,6 +28,7 @@ namespace MyStore.Controllers
         }
 
         [HttpGet("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetId(long id)
         {
             try

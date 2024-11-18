@@ -10,7 +10,7 @@ namespace MyStore.Controllers
 {
     [Route("api/user")]
     [ApiController]
-    //[Authorize]
+    [Authorize]
     public class UsersController : ControllerBase
     {
         private readonly IUserService _userService;
@@ -266,6 +266,7 @@ namespace MyStore.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(string id)
         {
             try
@@ -281,7 +282,7 @@ namespace MyStore.Controllers
 
 
         [HttpPut("update/{id}")]
-        //[Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> UpdateUser(string id, [FromBody] UserUpdateDTO user)
         {
             try
@@ -296,6 +297,7 @@ namespace MyStore.Controllers
         }
 
         [HttpGet("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetById(string id)
         {
             try

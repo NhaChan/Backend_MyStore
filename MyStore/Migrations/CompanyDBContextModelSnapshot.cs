@@ -581,7 +581,7 @@ namespace MyStore.Migrations
                     b.Property<string>("ImagesUrlsJson")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("ProductId")
+                    b.Property<int>("ProductId")
                         .HasColumnType("int");
 
                     b.Property<int>("Star")
@@ -910,7 +910,7 @@ namespace MyStore.Migrations
                         .IsRequired();
 
                     b.HasOne("MyStore.Models.Product", "Product")
-                        .WithMany()
+                        .WithMany("OrderDetails")
                         .HasForeignKey("ProductId");
 
                     b.Navigation("Order");
@@ -940,7 +940,7 @@ namespace MyStore.Migrations
             modelBuilder.Entity("MyStore.Models.ProductFavorite", b =>
                 {
                     b.HasOne("MyStore.Models.Product", "Product")
-                        .WithMany()
+                        .WithMany("ProductFavorites")
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -960,7 +960,9 @@ namespace MyStore.Migrations
                 {
                     b.HasOne("MyStore.Models.Product", "Product")
                         .WithMany("ProductReviews")
-                        .HasForeignKey("ProductId");
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("MyStore.Models.User", "User")
                         .WithMany()
@@ -1046,6 +1048,10 @@ namespace MyStore.Migrations
             modelBuilder.Entity("MyStore.Models.Product", b =>
                 {
                     b.Navigation("Images");
+
+                    b.Navigation("OrderDetails");
+
+                    b.Navigation("ProductFavorites");
 
                     b.Navigation("ProductReviews");
                 });

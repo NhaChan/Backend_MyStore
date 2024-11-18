@@ -28,6 +28,7 @@ namespace MyStore.Controllers
         //}
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin,CSKH")]
         public async Task<IActionResult> Delete(string id)
         {
             try

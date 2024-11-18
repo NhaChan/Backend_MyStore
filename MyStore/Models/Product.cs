@@ -27,5 +27,8 @@ namespace MyStore.Models
         //public Type Type { get; set; }
         public ICollection<Image> Images { get; set; } = new HashSet<Image>();
         public ICollection<ProductReview> ProductReviews { get; } = new HashSet<ProductReview>();
+        public ICollection<OrderDetail> OrderDetails { get; } = new HashSet<OrderDetail>();
+        public ICollection<ProductFavorite> ProductFavorites { get; } = new HashSet<ProductFavorite>();
+
     }
 }

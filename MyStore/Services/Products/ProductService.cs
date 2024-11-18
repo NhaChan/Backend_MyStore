@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
 using Microsoft.IdentityModel.Tokens;
 using MimeKit.Encodings;
 using MyStore.Constant;
@@ -74,8 +75,8 @@ namespace MyStore.Services.Products
             var product = await _productRepository.FindAsync(id);
             if(product != null)
             {
-                var images = await _imageRepository.GetImageProductAsync(id);
-                _fileStorage.Delete(images.Select(e => e.ImageUrl));
+                //var images = await _imageRepository.GetImageProductAsync(id);
+                //_fileStorage.Delete(images.Select(e => e.ImageUrl));
 
                 await _productRepository.DeleteAsync(product);
             }
@@ -310,9 +311,26 @@ namespace MyStore.Services.Products
             else throw new ArgumentException($"Id {id} " + ErrorMessage.NOT_FOUND);
         }
 
-        public async Task<IEnumerable<NameDTO>> GetNameProduct()
+        //public async Task<IEnumerable<NameDTO>> GetNameProduct()
+        //{
+        //    //var nameProduct = await _productRepository.GetAllAsync();
+        //    var nameProduct = await _productRepository.GetPagedAsync();
+        //    return _mapper.Map<IEnumerable<NameDTO>>(nameProduct);
+        //}
+
+        public async Task<IEnumerable<NameDTO>> GetNameProduct(int page, int pageSize, string? search)
         {
-            var nameProduct = await _productRepository.GetAllAsync();
+            IEnumerable<Product> nameProduct;
+            if (string.IsNullOrEmpty(search))
+            {
+                nameProduct = await _productRepository.GetPagedAsync(page, pageSize, null, e => e.CreatedAt);
+            }
+            else
+            {
+                Expression<Func<Product, bool>> expression = e => e.Name.Contains(search);
+                nameProduct = await _productRepository.GetPagedAsync(page, pageSize, expression, e => e.CreatedAt);
+            }
+
             return _mapper.Map<IEnumerable<NameDTO>>(nameProduct);
         }
 

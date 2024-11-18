@@ -283,11 +283,17 @@ namespace MyStore.Services.Auth
 
         public async Task<bool> SendTokenAsync(string email)
         {
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user != null)
+            {
+                throw new InvalidDataException(ErrorMessage.EXISTED);
+            }
+
             var token = new Random().Next(100000, 999999).ToString();
             _cachingService.Set(email, token, TimeSpan.FromMinutes(5));
 
             var message = $"Mã xác nhận tạo tài khoản ZuiZui shop: {token}";
-            await _emailSender.SendEmailAsync(email, "Reset password", message);
+            await _emailSender.SendEmailAsync(email, "Mã xác minh tài khoản của bạn: ", message);
 
             return true;
         }

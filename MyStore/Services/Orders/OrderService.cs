@@ -7,6 +7,7 @@ using MyStore.Models;
 using MyStore.Repository.CartItemRepository;
 using MyStore.Repository.OrderRepository;
 using MyStore.Repository.ProductRepository;
+using MyStore.Repository.TransactionRepository;
 using MyStore.Request;
 using MyStore.Response;
 using MyStore.Services.Caching;
@@ -32,6 +33,7 @@ namespace MyStore.Services.Orders
         private readonly IConfiguration _configuration;
         private readonly IFileStorage _fileStorage;
         private readonly IProductReviewRepository _productReviewRepository;
+        private readonly ITransactionRepository _transactionRepository;
 
         private readonly string pathReviewImages = "assets/images/reviews";
 
@@ -40,7 +42,8 @@ namespace MyStore.Services.Orders
             ICartItemRepository cartItemRepository, IPaymentMethodRepository paymentMethodRepository, 
             IMapper mapper, IPaymentService paymentService, IOrderDetailRepository orderDetailRepository,
             PayOS payOS, IServiceScopeFactory serviceScopeFactory, ICachingService cache,
-            IConfiguration configuration, IFileStorage fileStorage, IProductReviewRepository productReviewRepository)
+            IConfiguration configuration, IFileStorage fileStorage,
+            IProductReviewRepository productReviewRepository, ITransactionRepository transactionRepository)
         {
             _orderRepository = orderRepository;
             _productRepository = productRepository;
@@ -55,6 +58,7 @@ namespace MyStore.Services.Orders
             _configuration = configuration;
             _fileStorage = fileStorage;
             _productReviewRepository = productReviewRepository;
+            _transactionRepository = transactionRepository;
         }
 
         struct OrderCache
@@ -70,6 +74,7 @@ namespace MyStore.Services.Orders
 
         public async Task<string?> CreateOrder(string userId, OrderRequest request)
         {
+            using var transaction = await _transactionRepository.BeginTransactionAsync();
             try
             {
                 var now = DateTime.Now;
@@ -99,31 +104,9 @@ namespace MyStore.Services.Orders
 
                 var cartItems = await _cartItemRepository.GetAsync(e => e.UserId == userId && request.CartIds.Contains(e.ProductId));
                 var listProductUpdate = new List<Product>();
-                //var listDetails = new List<OrderDetail>();
+                var details = new List<OrderDetail>();
 
-                var details = cartItems.Select(cartItem =>
-                {
-                    double price = cartItem.Product.Price - (cartItem.Product.Price * (cartItem.Product.Discount / 100));
-                    price *= cartItem.Quantity;
-                    total += price;
-
-                    cartItem.Product.Sold += cartItem.Quantity;
-                    cartItem.Product.Quantity -= cartItem.Quantity;
-                    listProductUpdate.Add(cartItem.Product);
-                    var imageUrl = cartItem.Product.Images.FirstOrDefault();
-                    return new OrderDetail
-                    {
-                        OrderId = order.Id,
-                        ProductId = cartItem.ProductId,
-                        ProductName = cartItem.Product.Name,
-                        Quantity = cartItem.Quantity,
-                        OriginPrice = cartItem.Product.Price,
-                        Price = price,
-                        ImageUrl = imageUrl != null ? imageUrl.ImageUrl : null,
-                    };
-                }).ToList();
-
-                //foreach (var cartItem in cartItems)
+                //var details = cartItems.Select(cartItem =>
                 //{
                 //    double price = cartItem.Product.Price - (cartItem.Product.Price * (cartItem.Product.Discount / 100));
                 //    price *= cartItem.Quantity;
@@ -132,7 +115,8 @@ namespace MyStore.Services.Orders
                 //    cartItem.Product.Sold += cartItem.Quantity;
                 //    cartItem.Product.Quantity -= cartItem.Quantity;
                 //    listProductUpdate.Add(cartItem.Product);
-                //    listProductUpdate.Add(new OrderDetail
+                //    var imageUrl = cartItem.Product.Images.FirstOrDefault();
+                //    return new OrderDetail
                 //    {
                 //        OrderId = order.Id,
                 //        ProductId = cartItem.ProductId,
@@ -140,9 +124,44 @@ namespace MyStore.Services.Orders
                 //        Quantity = cartItem.Quantity,
                 //        OriginPrice = cartItem.Product.Price,
                 //        Price = price,
-                //        ImageUrl = cartItem.Product.ImageUrl,
-                //    });
-                //}
+                //        ImageUrl = imageUrl != null ? imageUrl.ImageUrl : null,
+                //    };
+                //}).ToList();
+
+                foreach (var cartItem in cartItems)
+                {
+                    var product = await _productRepository.SingleAsync(e => e.Id == cartItem.ProductId);
+
+                    //if (product.Quantity == 0)
+                    //{
+                    //    throw new InvalidDataException(ErrorMessage.SOLD_OUT);
+                    //}
+
+                    if (product.Quantity < cartItem.Quantity)
+                    {
+                        throw new InvalidDataException($"Chỉ còn {product.Quantity} sản phẩm {product.Name} trong kho. Vui lòng mua ít hơn!");
+                    }
+
+                    double price = cartItem.Product.Price - (cartItem.Product.Price * (cartItem.Product.Discount / 100));
+                    price *= cartItem.Quantity;
+                    total += price;
+
+                    cartItem.Product.Sold += cartItem.Quantity;
+                    cartItem.Product.Quantity -= cartItem.Quantity;
+                    listProductUpdate.Add(cartItem.Product);
+
+                    var imageUrl = cartItem.Product.Images.FirstOrDefault();
+                    details.Add(new OrderDetail
+                    {
+                        OrderId = order.Id,
+                        ProductId = cartItem.ProductId,
+                        ProductName = cartItem.Product.Name,
+                        Quantity = cartItem.Quantity,
+                        OriginPrice = cartItem.Product.Price,
+                        Price = price,
+                        ImageUrl = imageUrl?.ImageUrl,
+                    });
+                }
 
                 double shipCost = CalculateShip(total);
                 order.ShippingCost = shipCost;
@@ -187,11 +206,13 @@ namespace MyStore.Services.Orders
                     _cache.Set("Order " + order.Id, orderCache, cacheOptions);
                     return paymentUrl;
                 }
-                else return null;
+                await transaction.CommitAsync();
+                return null;
 
             }
             catch (Exception)
             {
+                await transaction.RollbackAsync();
                 throw;
             }
         }

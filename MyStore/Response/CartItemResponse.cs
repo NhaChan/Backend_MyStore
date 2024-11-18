@@ -8,6 +8,7 @@
         public double Price { get; set; }
         public double Discount { get; set; }
         public int? Quantity { get; set; }
+        public int Stock { get; set; }
         public string? ImageUrl { get; set; }
     }
 }

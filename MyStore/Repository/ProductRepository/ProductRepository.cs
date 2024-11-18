@@ -54,7 +54,7 @@ namespace MyStore.Repository.ProductRepository
         public override async Task<IEnumerable<Product>> GetPagedAsync<TKey>(int page, int pageSize, Expression<Func<Product, bool>>? expression, Expression<Func<Product, TKey>> orderBy)
         {
             return expression == null
-                ? await _dbContext.Products                    
+                ? await _dbContext.Products
                     .Paginate(page, pageSize)
                     .Include(e => e.Images)
                     .Include(e => e.Brand)
@@ -98,5 +98,17 @@ namespace MyStore.Repository.ProductRepository
                     .AsSingleQuery()
                     .ToArrayAsync();
         }
+
+        //public override async Task<IEnumerable<Product>> GetPagedAsync<TKey>(int page, int pageSize, Expression<Func<Product, bool>>? expression)
+        //{
+        //    return expression == null
+        //        ? await _dbContext.Products
+        //            .Paginate(page, pageSize)
+        //            .ToArrayAsync()
+        //        : await _dbContext.Products
+        //            .Where(expression)
+        //            .Paginate(page, pageSize)
+        //            .ToArrayAsync();
+        //}
     }
 }

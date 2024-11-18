@@ -155,7 +155,7 @@ builder.Services.AddCors(opt =>
 
 var app = builder.Build();
 
-//DataSeeding.Initialize(app.Services).Wait();
+DataSeeding.Initialize(app.Services).Wait();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

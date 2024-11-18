@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using MyStore.Services.Statistics;
 
@@ -11,6 +12,7 @@ namespace MyStore.Controllers
         private readonly IStatisticsService _statisticsService = statisticsService;
 
         [HttpGet("getStatisticsFormTo")]
+        [Authorize(Roles = "Admin,Statist")]
         public async Task<IActionResult> Get([FromQuery] DateTime from, [FromQuery] DateTime to)
         {
             try
@@ -25,6 +27,7 @@ namespace MyStore.Controllers
         }
 
         [HttpGet("byYear")]
+        //[Authorize(Roles = "Admin,Statist")]
         public async Task<IActionResult> GetByYear(int year, int? month)
         {
             try
@@ -39,6 +42,7 @@ namespace MyStore.Controllers
         }
 
         [HttpGet("by-productYear")]
+        [Authorize(Roles = "Admin,Statist")]
         public async Task<IActionResult> GetByProductYear(int productId, int year, int? month)
         {
             try
@@ -53,6 +57,7 @@ namespace MyStore.Controllers
         }
 
         [HttpGet("getStatisticsProductFormTo")]
+        //[Authorize(Roles = "Admin,Statist")]
         public async Task<IActionResult> GetProduct(int productId, [FromQuery] DateTime from, [FromQuery] DateTime to)
         {
             try

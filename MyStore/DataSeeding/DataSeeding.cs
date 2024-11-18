@@ -24,7 +24,7 @@ namespace MyStore.DataSeeding
                     }
                     await InitialRoles(scope.ServiceProvider, context);
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
                     throw;
                 }

@@ -2,6 +2,7 @@
 using MyStore.Constant;
 using MyStore.Models;
 using MyStore.Repository.CartItemRepository;
+using MyStore.Repository.ProductRepository;
 using MyStore.Request;
 using MyStore.Response;
 
@@ -10,18 +11,30 @@ namespace MyStore.Services.Carts
     public class CartItemService : ICartItemService
     {
         private readonly ICartItemRepository _cartItemRepository;
+        private readonly IProductRepository _productRepository;
 
-        public CartItemService(ICartItemRepository cartItemRepository)
+        public CartItemService(ICartItemRepository cartItemRepository, IProductRepository productRepository)
         {
             _cartItemRepository = cartItemRepository;
+            _productRepository = productRepository;
         }
         public async Task AddToCartAsync(string userId, CartItemRequest request)
         {
             try
             {
+                var product = await _productRepository.SingleAsync(e => e.Id == request.ProductId);
+                if (product != null && product.Quantity <= 0)
+                {
+                    throw new InvalidDataException(ErrorMessage.SOLD_OUT);
+                }
+
                 var exitingCartItem = await _cartItemRepository.FindAsyncCart(e => e.UserId == userId && e.ProductId == request.ProductId);
                 if (exitingCartItem != null)
                 {
+                    if ((request.Quantity + exitingCartItem.Quantity) > product.Quantity)
+                    {
+                        throw new InvalidDataException(ErrorMessage.CART_MAX);
+                    }
                     exitingCartItem.Quantity += request.Quantity;
                     await _cartItemRepository.UpdateAsync(exitingCartItem);
                 }
@@ -59,6 +72,7 @@ namespace MyStore.Services.Carts
                         Discount = cartItem.Product.Discount,
                         ImageUrl = imageUrl != null ? imageUrl.ImageUrl : null,
                         Quantity = cartItem.Quantity,
+                        Stock = cartItem.Product.Quantity,
                     };
                 });
                 return res;       

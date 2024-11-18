@@ -153,7 +153,7 @@ namespace MyStore.Services.Users
             {
                 return _mapper.Map<ImageDTO>(user);
             }
-            else { throw new ArgumentException(ErrorMessage.NOT_FOUND); }
+            else { throw new ArgumentException(ErrorMessage.NOT_FOUND + " người dùng"); }
         }
 
         public async Task<PagedResponse<ProductDTO>> GetProductFavorite(string userId, PageRequest request)

@@ -15,7 +15,7 @@ namespace MyStore.Controllers
         public ProductController(IProductService productService) => _productService = productService;
 
         [HttpGet]
-        //[Authorize(Roles = "Admin")]
+        //[Authorize(Roles = "Admin,Warehouser")]
         public async Task<IActionResult> GetAll([FromQuery] PageRequest request)
         {
             try
@@ -63,7 +63,7 @@ namespace MyStore.Controllers
         }
 
         [HttpPost("create")]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Warehouser")]
         public async Task<IActionResult> Create([FromForm] ProductRequest request, [FromForm] IFormCollection form)
         {
             try
@@ -78,7 +78,7 @@ namespace MyStore.Controllers
         }
 
         [HttpPut("update/{id}")]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Warehouser")]
         public async Task<IActionResult> Update(int id, [FromForm] ProductRequest request, [FromForm] IFormCollection form)
         {
             try
@@ -98,7 +98,7 @@ namespace MyStore.Controllers
         }
 
         [HttpPut("updateEnable/{id}")]
-        //[Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Warehouser")]
         public async Task<IActionResult> UpdateProductEnable(int id, [FromBody] UpdateEnableRequest request)
         {
             try
@@ -117,7 +117,7 @@ namespace MyStore.Controllers
         }
 
         [HttpDelete("delete/{id}")]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Warehouser")]
         public async Task<IActionResult> Delete(int id)
         {
             try
@@ -136,12 +136,12 @@ namespace MyStore.Controllers
         }
 
         [HttpGet("name")]
-        [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> GetNameProduct()
+        //[Authorize(Roles = "Admin")]
+        public async Task<IActionResult> GetNameProduct([FromQuery] PageRequest request)
         {
             try
             {
-                var namrProduct = await _productService.GetNameProduct();
+                var namrProduct = await _productService.GetNameProduct(request.page, request.pageSize, request.search);
                 return Ok(namrProduct);
             }
             catch(Exception ex) { return StatusCode(500, ex.Message);}
