@@ -22,6 +22,7 @@ namespace MyStore.DTO
         public bool Reviewed { get; set; }
         public DateTime DateReceived { get; set; }
 
+
     }
 
     //public class OrderDetailsResponse : OrderDTO

@@ -40,12 +40,14 @@ namespace MyStore.Mapping
             CreateMap<OrderDetail, ProductOrderDetails>();
             CreateMap<Order, OrderDetailsResponse>()
                 .ForMember(d => d.ProductOrderDetails, opt => opt.MapFrom(src => src.OrderDetails));
+            CreateMap<OrderDetail, ProductDTO>()
+                .ForMember(d => d.Name, opt => opt.MapFrom(src => src.ProductName));
 
             CreateMap<StockReceipt, StockReceiptDTO>()
                 .ForMember(d => d.UserName, opt => opt.MapFrom(src => src.User.FullName));
 
-            CreateMap<StockReceiptDetail, StockReceiptDetailResponse>()
-                .ForMember(d => d.ProductName, opt => opt.MapFrom(src => src.Product.Name));
+            CreateMap<StockReceiptDetail, StockReceiptDetailResponse>();
+                //.ForMember(d => d.ProductName, opt => opt.MapFrom(src => src.Product.Name));
 
             CreateMap<Log, StockReceiptDTO>();
 

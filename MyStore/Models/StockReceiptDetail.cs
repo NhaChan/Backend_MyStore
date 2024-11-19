@@ -1,4 +1,6 @@
-﻿namespace MyStore.Models
+﻿using Microsoft.EntityFrameworkCore;
+
+namespace MyStore.Models
 {
     public class StockReceiptDetail
     {
@@ -8,7 +10,9 @@
 
         public long StockReceiptId { get; set; }
         public StockReceipt StockReceipt { get; set; }
-        public int ProductId { get; set; }
+        public int? ProductId { get; set; }
+        [DeleteBehavior(DeleteBehavior.SetNull)]
         public Product Product { get; set; }
+        public string ProductName { get; set; }
     }
 }

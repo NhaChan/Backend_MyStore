@@ -38,8 +38,8 @@ namespace MyStore.Services.Orders
         private readonly string pathReviewImages = "assets/images/reviews";
 
 
-        public OrderService(IOrderRepository orderRepository, IProductRepository productRepository, 
-            ICartItemRepository cartItemRepository, IPaymentMethodRepository paymentMethodRepository, 
+        public OrderService(IOrderRepository orderRepository, IProductRepository productRepository,
+            ICartItemRepository cartItemRepository, IPaymentMethodRepository paymentMethodRepository,
             IMapper mapper, IPaymentService paymentService, IOrderDetailRepository orderDetailRepository,
             PayOS payOS, IServiceScopeFactory serviceScopeFactory, ICachingService cache,
             IConfiguration configuration, IFileStorage fileStorage,
@@ -167,7 +167,7 @@ namespace MyStore.Services.Orders
                 order.ShippingCost = shipCost;
                 total += shipCost;
 
-                if(total != request.Total)
+                if (total != request.Total)
                 {
                     throw new ArgumentException(ErrorMessage.BAD_REQUEST);
                 }
@@ -177,7 +177,7 @@ namespace MyStore.Services.Orders
                 await _cartItemRepository.DeleteAsync(cartItems);
 
 
-                if(method.Name == PaymentMethodEnum.PayOS.ToString())
+                if (method.Name == PaymentMethodEnum.PayOS.ToString())
                 {
                     var orders = new PayOSOrderInfo
                     {
@@ -219,7 +219,7 @@ namespace MyStore.Services.Orders
 
         private async void OnPayOSDeadline(object key, object? value, EvictionReason reason, object? state)
         {
-            if(value != null)
+            if (value != null)
             {
                 using var _scope = _serviceScopeFactory.CreateScope();
                 var orderRepository = _scope.ServiceProvider.GetRequiredService<IOrderRepository>();
@@ -228,12 +228,12 @@ namespace MyStore.Services.Orders
                 var data = (OrderCache)value;
 
                 var paymentInfo = await payOS.getPaymentLinkInformation(data.OrderId);
-                if(paymentInfo.status == "PAID")
+                if (paymentInfo.status == "PAID")
                 {
                     var order = await orderRepository.FindAsync(data.OrderId);
-                    if(order != null)
+                    if (order != null)
                     {
-                        if(paymentInfo.amount == order.Total)
+                        if (paymentInfo.amount == order.Total)
                         {
                             order.PaymentTranId = paymentInfo.id;
                             order.AmountPaid = paymentInfo.amountPaid;
@@ -246,7 +246,7 @@ namespace MyStore.Services.Orders
                         await orderRepository.UpdateAsync(order);
                     }
                 }
-                else if(paymentInfo.status != "CANCELLED")
+                else if (paymentInfo.status != "CANCELLED")
                 {
                     await payOS.cancelPaymentLink(data.OrderId);
                 }
@@ -258,10 +258,10 @@ namespace MyStore.Services.Orders
             var orders = await _orderRepository.GetPageOrderByDescendingAsync(page.page, page.pageSize, e => e.UserId == userId, x => x.CreatedAt);
             var total = await _orderRepository.CountAsync();
 
-            var items = _mapper.Map<IEnumerable<OrderDTO>> (orders);
+            var items = _mapper.Map<IEnumerable<OrderDTO>>(orders);
             foreach (var item in items)
             {
-                var p = (await _orderDetailRepository.GetAsync(x => x.OrderId == item.Id)).FirstOrDefault()?.Product;
+                var p = (await _orderDetailRepository.GetAsync(x => x.OrderId == item.Id)).FirstOrDefault();
                 item.Product = _mapper.Map<ProductDTO>(p);
             }
 
@@ -355,16 +355,21 @@ namespace MyStore.Services.Orders
                     || order.OrderStatus.Equals(DeliveryStatusEnum.Confirmed))
                 {
                     order.OrderStatus = DeliveryStatusEnum.Canceled;
-                    
+
                     var orderDetail = await _orderDetailRepository.GetAsync(e => e.OrderId == orderId);
 
                     var listProductUpdate = new List<Product>();
 
-                    foreach(var detail in orderDetail)
+                    foreach (var detail in orderDetail)
                     {
-                        detail.Product.Sold -= detail.Quantity;
-                        detail.Product.Quantity += detail.Quantity;
-                        listProductUpdate.Add(detail.Product);
+                        var product = await _productRepository.SingleOrDefaultAsync(e => e.Id == detail.ProductId);
+                        if (product != null)
+                        {
+                            detail.Product.Sold -= detail.Quantity;
+                            detail.Product.Quantity += detail.Quantity;
+                            listProductUpdate.Add(detail.Product);
+                        }
+                        else continue;
                     }
                     _cache.Remove("Order " + orderId);
                     await _orderRepository.UpdateAsync(order);
@@ -387,11 +392,17 @@ namespace MyStore.Services.Orders
                     var orderDetail = await _orderDetailRepository.GetAsync(e => e.OrderId == orderId);
                     var listProductUpdate = new List<Product>();
 
+
                     foreach (var detail in orderDetail)
                     {
-                        detail.Product.Sold -= detail.Quantity;
-                        detail.Product.Quantity += detail.Quantity;
-                        listProductUpdate.Add(detail.Product);
+                        var product = await _productRepository.SingleOrDefaultAsync(e => e.Id == detail.ProductId);
+                        if (product != null)
+                        {
+                            detail.Product.Sold -= detail.Quantity;
+                            detail.Product.Quantity += detail.Quantity;
+                            listProductUpdate.Add(detail.Product);
+                        }
+                        else continue;
                     }
 
                     _cache.Remove("Order " + orderId);
@@ -422,7 +433,7 @@ namespace MyStore.Services.Orders
         {
             var order = await _orderRepository.SingleOrdefaultAsyncInclude(e => e.Id == orderId)
                 ?? throw new InvalidDataException(ErrorMessage.ORDER_NOT_FOUND);
-            if(order.OrderStatus != DeliveryStatusEnum.Confirmed)
+            if (order.OrderStatus != DeliveryStatusEnum.Confirmed)
             {
                 throw new InvalidDataException(ErrorMessage.BAD_REQUEST);
             }
@@ -435,7 +446,7 @@ namespace MyStore.Services.Orders
             var to_name = receiver[0];
             var to_phone = receiver[1];
 
-            if(token == null || shopId == null || url == null || to_name == null || to_phone == null)
+            if (token == null || shopId == null || url == null || to_name == null || to_phone == null)
             {
                 throw new ArgumentNullException(ErrorMessage.ARGUMENT_NULL);
             }
@@ -500,7 +511,7 @@ namespace MyStore.Services.Orders
 
             Expression<Func<Order, DateTime?>> sortExpression = e => e.CreatedAt;
 
-            if(statusEnum == DeliveryStatusEnum.Proccessing)
+            if (statusEnum == DeliveryStatusEnum.Proccessing)
             {
                 sortExpression = e => e.CreatedAt;
             }
@@ -551,8 +562,8 @@ namespace MyStore.Services.Orders
 
             //if (string.IsNullOrEmpty(key))
             //{
-                totalOrder = await _orderRepository.CountAsync(e => e.UserId == userId && e.OrderStatus == statusEnum);
-                orders = await _orderRepository.GetPageOrderByDescendingAsync(page, pageSize, x => x.UserId == userId && x.OrderStatus == statusEnum, sortExpression);
+            totalOrder = await _orderRepository.CountAsync(e => e.UserId == userId && e.OrderStatus == statusEnum);
+            orders = await _orderRepository.GetPageOrderByDescendingAsync(page, pageSize, x => x.UserId == userId && x.OrderStatus == statusEnum, sortExpression);
             //}
 
             //else
@@ -572,7 +583,7 @@ namespace MyStore.Services.Orders
             var items = _mapper.Map<IEnumerable<OrderDTO>>(orders);
             foreach (var item in items)
             {
-                var p = (await _orderDetailRepository.GetAsync(x => x.OrderId == item.Id)).FirstOrDefault()?.Product;
+                var p = (await _orderDetailRepository.GetAsync(x => x.OrderId == item.Id)).FirstOrDefault();
                 item.Product = _mapper.Map<ProductDTO>(p);
             }
             return new PagedResponse<OrderDTO>
@@ -590,7 +601,7 @@ namespace MyStore.Services.Orders
             {
                 var order = await _orderRepository.SingleOrDefaultAsync(e => e.Id == orderId && e.UserId == userId)
                     ?? throw new InvalidOperationException(ErrorMessage.ORDER_NOT_FOUND);
-                if(order.OrderStatus != DeliveryStatusEnum.Received && order.OrderStatus != DeliveryStatusEnum.Finish)
+                if (order.OrderStatus != DeliveryStatusEnum.Received && order.OrderStatus != DeliveryStatusEnum.Finish)
                 {
                     throw new InvalidDataException("Bạn chưa thể đánh giá đơn hàng này!");
                 }
@@ -602,7 +613,7 @@ namespace MyStore.Services.Orders
                     var productPath = pathReviewImages + "/" + review.ProductId;
                     List<string>? pathNames = null;
 
-                    if(review.Images != null)
+                    if (review.Images != null)
                     {
                         pathNames = new();
                         var imgNames = review.Images.Select(image =>
@@ -615,7 +626,7 @@ namespace MyStore.Services.Orders
                     }
 
                     var product = await _productRepository.FindAsync(review.ProductId);
-                    if(product != null)
+                    if (product != null)
                     {
                         var currentStar = product.Rating * product.RatingCount;
                         product.Rating = (currentStar + review.Star) / (product.RatingCount + 1);
@@ -635,7 +646,7 @@ namespace MyStore.Services.Orders
                 await _productReviewRepository.AddAsync(pReviews);
                 await _productRepository.UpdateAsync(products);
                 order.Reviewed = true;
-                await _orderRepository.UpdateAsync(order); 
+                await _orderRepository.UpdateAsync(order);
             }
             catch (Exception)
             {
@@ -645,7 +656,7 @@ namespace MyStore.Services.Orders
 
         public async Task<SalesRespose> GetSaleDate(DateTime from, DateTime to)
         {
-            var result = await _orderRepository.GetAsync(e => e.DateReceived >= from && e.DateReceived <= to.AddDays(1) 
+            var result = await _orderRepository.GetAsync(e => e.DateReceived >= from && e.DateReceived <= to.AddDays(1)
                 && (e.OrderStatus == DeliveryStatusEnum.Received || e.OrderStatus == DeliveryStatusEnum.Finish));
 
             var saleList = result.Select(e => new OrderDTO
@@ -700,5 +711,5 @@ namespace MyStore.Services.Orders
         }
     }
 
-    
+
 }

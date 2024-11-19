@@ -240,10 +240,10 @@ namespace MyStore.Services.Auth
 
                         await _transactionRepository.CommitTransactionAsync();
                         return IdentityResult.Success;
-                    } catch (Exception ex)
+                    } catch (Exception)
                     {
                         await _transactionRepository.RollbackTransactionAsync();
-                        throw new Exception(ErrorMessage.INVALID);
+                        throw;
                     }
                 }
             }

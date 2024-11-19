@@ -60,6 +60,7 @@ namespace MyStore.Services.StockReceipts
 
                     Quantity = item.Quantity,
                     OriginPrice = item.OriginPrice,
+                    ProductName = product?.Name ?? ""
                 };
                 listStockReceiptDetail.Add(stockReceiptDetail);
             }

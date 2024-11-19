@@ -673,8 +673,12 @@ namespace MyStore.Migrations
                     b.Property<double>("OriginPrice")
                         .HasColumnType("float");
 
-                    b.Property<int>("ProductId")
+                    b.Property<int?>("ProductId")
                         .HasColumnType("int");
+
+                    b.Property<string>("ProductName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("Quantity")
                         .HasColumnType("int");
@@ -911,7 +915,8 @@ namespace MyStore.Migrations
 
                     b.HasOne("MyStore.Models.Product", "Product")
                         .WithMany("OrderDetails")
-                        .HasForeignKey("ProductId");
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.Navigation("Order");
 
@@ -987,8 +992,7 @@ namespace MyStore.Migrations
                     b.HasOne("MyStore.Models.Product", "Product")
                         .WithMany()
                         .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.HasOne("MyStore.Models.StockReceipt", "StockReceipt")
                         .WithMany("StockReceiptDetails")

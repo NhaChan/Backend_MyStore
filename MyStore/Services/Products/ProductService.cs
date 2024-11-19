@@ -256,6 +256,9 @@ namespace MyStore.Services.Products
                     product.Quantity = request.Quantity;
                     product.Discount = request.Discount;
                     product.Description = request.Description;
+                    product.CategoryId = request.CategoryId;
+                    product.BrandId = request.BrandId;
+
 
                     var oldImgs = await _imageRepository.GetImageProductAsync(id);
                     List<Image> imageDelete = new();
