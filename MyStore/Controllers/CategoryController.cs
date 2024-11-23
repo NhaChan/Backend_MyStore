@@ -30,7 +30,7 @@ namespace MyStore.Controllers
         }
 
         [HttpPost("create")]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,CSKH")]
         public async Task<IActionResult> Creat([FromForm] NameRequest request, [FromForm] IFormCollection files)
         {
             try
@@ -46,7 +46,7 @@ namespace MyStore.Controllers
         }
 
         [HttpPut("update/{id}")]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,CSKH")]
         public async Task<IActionResult> Update(int id, [FromForm] NameRequest request, [FromForm] IFormCollection files)
         {
             try
@@ -66,7 +66,7 @@ namespace MyStore.Controllers
         }
 
         [HttpDelete("delete/{id}")]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,CSKH")]
         public async Task<IActionResult> Delete(int id)
         {
             try

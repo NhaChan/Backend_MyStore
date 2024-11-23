@@ -15,7 +15,6 @@ namespace MyStore.Controllers
         public ProductController(IProductService productService) => _productService = productService;
 
         [HttpGet]
-        //[Authorize(Roles = "Admin,Warehouser")]
         public async Task<IActionResult> GetAll([FromQuery] PageRequest request)
         {
             try

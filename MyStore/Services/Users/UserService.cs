@@ -303,6 +303,11 @@ namespace MyStore.Services.Users
 
                     };
                     var result = await _userManager.CreateAsync(User, user.Password);
+                    var email = await _userManager.FindByEmailAsync(user.Email);
+                    if (email != null)
+                    {
+                        throw new InvalidDataException(ErrorMessage.EXISTED);
+                    }
                     if (!result.Succeeded)
                     {
                         throw new Exception(ErrorMessage.INVALID);

@@ -8,5 +8,6 @@
         Task SaveAsync(string path, IFormFileCollection files, IList<string> fileNames);
         void Delete(string path);
         void Delete(IEnumerable<string> path);
+        void DeleteDirectory(string path, bool recursive = true);
     }
 }

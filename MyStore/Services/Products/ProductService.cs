@@ -23,6 +23,7 @@ namespace MyStore.Services.Products
         private readonly IFileStorage _fileStorage;
         private readonly string path = "assets/images/products";
         private readonly IProductReviewRepository _productReviewRepository;
+        private readonly string reviewPath = "assets/images/reviews";
 
         public ProductService(IProductRepository productRepository, IImageRepository imageRepository, IMapper mapper, IFileStorage fileStorage, IProductReviewRepository productReviewRepository)
         {
@@ -75,10 +76,15 @@ namespace MyStore.Services.Products
             var product = await _productRepository.FindAsync(id);
             if(product != null)
             {
+                var images = await _imageRepository.GetImageProductAsync(id);
+
+                var reviewImagePath = Path.Combine(reviewPath, product.Id.ToString());
+
                 //var images = await _imageRepository.GetImageProductAsync(id);
                 //_fileStorage.Delete(images.Select(e => e.ImageUrl));
 
                 await _productRepository.DeleteAsync(product);
+                _fileStorage.DeleteDirectory(reviewImagePath);
             }
             else throw new ArgumentException($"Id {id} " + ErrorMessage.NOT_FOUND);
         }

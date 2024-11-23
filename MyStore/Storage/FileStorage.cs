@@ -24,6 +24,15 @@ namespace MyStore.Storage
             }
         }
 
+        public void DeleteDirectory(string path, bool recursive = true)
+        {
+            var directoryPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", path);
+            if (Directory.Exists(directoryPath))
+            {
+                Directory.Delete(directoryPath, recursive);
+            }
+        }
+
         public async Task<string> GetBase64Async(string path)
         {
             var filePath = Path.Combine(Directory.GetCurrentDirectory(), path);

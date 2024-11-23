@@ -59,7 +59,7 @@ namespace MyStore.Controllers
         }
 
         [HttpGet("get-all")]
-        [Authorize(Roles = "Admin,Statist")]
+        [Authorize(Roles = "Admin,CSKH,Statist")]
         public async Task<IActionResult> GetAll([FromQuery] PageRequest request)
         {
             var result = await _orderService.GetAllOrder(request.page, request.pageSize, request.search);
@@ -200,7 +200,7 @@ namespace MyStore.Controllers
         }
 
         [HttpGet("status/{status}")]
-        [Authorize(Roles = "Admin,Statist")]
+        [Authorize(Roles = "Admin,CSKH,Statist")]
         public async Task<IActionResult> GetWithOrderStatus(DeliveryStatusEnum status, [FromQuery] PageRequest request)
         {
             try
