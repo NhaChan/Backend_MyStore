@@ -9,5 +9,7 @@ namespace MyStore.Repository.ProductRepository
         //Task<IEnumerable<Product>> GetPageProductAsync(int page, int pageSize);
         //Task<int> CountAsync(string search);
         Task<Product?> GetProductByIdAsync(int id);
+        Task<IEnumerable<Product>> OrderByDescendingBySold(int page, int pageSize);
+        Task<IEnumerable<Product>> OrderByDescendingByDiscount(int page, int pageSize);
     }
 }

@@ -381,5 +381,56 @@ namespace MyStore.Services.Products
             };
         }
 
+        public async Task<PagedResponse<ProductDTO>> OrderByDescendingBySold(int page, int pageSize)
+        {
+            int totalProduct;
+            IEnumerable<Product> products;
+
+            totalProduct = await _productRepository.CountAsync();
+            products = await _productRepository.OrderByDescendingBySold(page, pageSize);
+
+            var res = _mapper.Map<IEnumerable<ProductDTO>>(products);
+            foreach (var product in res)
+            {
+                var image = await _imageRepository.GetFirstImageByProductAsync(product.Id);
+                if (image != null)
+                {
+                    product.ImageUrl = image.ImageUrl;
+                }
+            }
+            return new PagedResponse<ProductDTO>
+            {
+                Items = res,
+                Page = page,
+                PageSize = pageSize,
+                TotalItems = totalProduct
+            };
+        }
+
+        public async Task<PagedResponse<ProductDTO>> OrderByDescendingByDiscount(int page, int pageSize)
+        {
+            int totalProduct;
+            IEnumerable<Product> products;
+
+            totalProduct = await _productRepository.CountAsync();
+            products = await _productRepository.OrderByDescendingByDiscount(page, pageSize);
+
+            var res = _mapper.Map<IEnumerable<ProductDTO>>(products);
+            foreach (var product in res)
+            {
+                var image = await _imageRepository.GetFirstImageByProductAsync(product.Id);
+                if (image != null)
+                {
+                    product.ImageUrl = image.ImageUrl;
+                }
+            }
+            return new PagedResponse<ProductDTO>
+            {
+                Items = res,
+                Page = page,
+                PageSize = pageSize,
+                TotalItems = totalProduct
+            };
+        }
     }
 }

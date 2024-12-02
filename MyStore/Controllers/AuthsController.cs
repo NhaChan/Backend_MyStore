@@ -51,11 +51,11 @@ namespace MyStore.Controllers
         public async Task<IActionResult> RefreshToken(TokenModel token)
         {
             var result = await _authService.RefreshToken(token);
-            if(result != null)
+            if (result != null)
             {
                 return Ok(result);
             }
-            else 
+            else
             {
                 return Unauthorized("Invalid attempt");
             };
@@ -65,7 +65,7 @@ namespace MyStore.Controllers
         public async Task<IActionResult> Logout()
         {
             var userID = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if(string.IsNullOrEmpty(userID))
+            if (string.IsNullOrEmpty(userID))
             {
                 return Unauthorized("User id claim not found");
             }
@@ -90,7 +90,7 @@ namespace MyStore.Controllers
         public IActionResult VerifyResetToken([FromBody] VerifyResetTokenRequest request)
         {
             var result = _authService.VerifyResetToken(request.Email, request.Token);
-            if(!result)
+            if (!result)
             {
                 return BadRequest("Invalid or expired is token.");
             }
@@ -112,13 +112,21 @@ namespace MyStore.Controllers
         [HttpPost("send-code-register")]
         public async Task<IActionResult> CreateToken([FromBody] ResetPasswordRequest request)
         {
-            var result = await _authService.SendTokenAsync(request.Email);
-            if (!result)
+            try
             {
-                return BadRequest("Failed to reset password.");
+                var result = await _authService.SendTokenAsync(request.Email);
+                if (!result)
+                {
+                    return BadRequest("Failed to reset password.");
+                }
+
+                return Ok("Reset token sent.");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
             }
 
-            return Ok("Reset token sent.");
         }
 
     }

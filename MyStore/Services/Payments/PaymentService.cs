@@ -95,10 +95,10 @@ namespace MyStore.Services.Payments
                 else throw new InvalidOperationException(ErrorMessage.NOT_FOUND + " đơn hàng");
             }
             else
-                {
-                    _cache.Remove("Order " + request.OrderCode);
-                    throw new Exception(ErrorMessage.ERROR);
-                }
+            {
+                _cache.Remove("Order " + request.OrderCode);
+                throw new Exception(ErrorMessage.ERROR);
+            }
         }
     }
 }

@@ -99,6 +99,28 @@ namespace MyStore.Repository.ProductRepository
                     .ToArrayAsync();
         }
 
+        public async Task<IEnumerable<Product>> OrderByDescendingBySold(int page, int pageSize)
+        {
+            return await _dbContext.Products
+                .Where(e => e.Quantity > 0)
+                .Include(e => e.Brand)
+                .Include(e => e.Caterory)
+                .OrderByDescending(e => e.Sold)
+                .Paginate(page, pageSize)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<Product>> OrderByDescendingByDiscount(int page, int pageSize)
+        {
+            return await _dbContext.Products
+                .Where(e => e.Quantity > 0 && e.Discount > 0)
+                .Include(e => e.Brand)
+                .Include(e => e.Caterory)
+                .OrderByDescending(e => e.Discount)
+                .Paginate(page, pageSize)
+                .ToListAsync();
+        }
+
         //public override async Task<IEnumerable<Product>> GetPagedAsync<TKey>(int page, int pageSize, Expression<Func<Product, bool>>? expression)
         //{
         //    return expression == null

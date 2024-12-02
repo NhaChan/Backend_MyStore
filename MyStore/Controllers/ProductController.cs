@@ -159,5 +159,33 @@ namespace MyStore.Controllers
                 return StatusCode(500, ex.Message);
             }
         }
+
+        [HttpGet("descending-by-sold")]
+        public async Task<IActionResult> DescendingBySold([FromQuery] PageRequest request)
+        {
+            try
+            {
+                var res = await _productService.OrderByDescendingBySold(request.page, request.pageSize);
+                return Ok(res);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
+
+        [HttpGet("descending-by-discount")]
+        public async Task<IActionResult> DescendingByDiscount([FromQuery] PageRequest request)
+        {
+            try
+            {
+                var res = await _productService.OrderByDescendingByDiscount(request.page, request.pageSize);
+                return Ok(res);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
     }
 }

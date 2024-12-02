@@ -70,7 +70,7 @@ namespace MyStore.Services.Orders
             public string? payos_OrderInfo { get; set; }
         }
 
-        private double CalculateShip(double price) => price >= 400000 ? 0 : price >= 200000 ? 2000 : 4000;
+        private double CalculateShip(double price) => price >= 400000 ? 0 : price >= 200000 ? 20000 : 40000;
 
         public async Task<string?> CreateOrder(string userId, OrderRequest request)
         {
@@ -176,7 +176,7 @@ namespace MyStore.Services.Orders
                 await _productRepository.UpdateAsync(listProductUpdate);
                 await _cartItemRepository.DeleteAsync(cartItems);
 
-
+                string? paymentUrl = null;
                 if (method.Name == PaymentMethodEnum.PayOS.ToString())
                 {
                     var orders = new PayOSOrderInfo
@@ -191,7 +191,7 @@ namespace MyStore.Services.Orders
                         })
                     };
 
-                    var paymentUrl = await _paymentService.GetPayOSURL(orders);
+                    paymentUrl = await _paymentService.GetPayOSURL(orders);
                     var orderCache = new OrderCache()
                     {
                         OrderId = order.Id,
@@ -204,10 +204,10 @@ namespace MyStore.Services.Orders
                     };
                     cacheOptions.RegisterPostEvictionCallback(OnPayOSDeadline, this);
                     _cache.Set("Order " + order.Id, orderCache, cacheOptions);
-                    return paymentUrl;
                 }
                 await transaction.CommitAsync();
-                return null;
+
+                return paymentUrl;
 
             }
             catch (Exception)
