@@ -4,7 +4,7 @@
     {
         public const string NOT_FOUND = "Không tìm thấy";
         public const string NOT_FOUND_USER = "Không tìm thấy người dùng";
-        public const string PASSWORD_ERROR = "Tên hoặc tài khoản không chính xác";
+        public const string PASSWORD_ERROR = "Tên tài khoản hoặc mật khẩu không chính xác";
         public const string INVALID = "Giá trị không hợp lệ.";
         public const string BAD_REQUEST = "Yêu cầu không hợp lệ.";
         public const string ORDER_NOT_FOUND = "Không tìm thấy đơn đặt hàng.";

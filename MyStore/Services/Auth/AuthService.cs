@@ -276,7 +276,7 @@ namespace MyStore.Services.Auth
             _cachingService.Set(email, token, TimeSpan.FromMinutes(5));
 
             var message = $"Your password reset code is: {token}";
-            await _emailSender.SendEmailAsync(email, "Reset password", message);
+            await _emailSender.SendEmailAsync(email, "Mã xác minh tài khoản MyShop: ", message);
 
             return true;
         }

@@ -18,11 +18,17 @@ namespace MyStore.Services.SendMail
     public class SendMailService : ISendMailService
     {
         private readonly MailSettings _settings;
+        private readonly IWebHostEnvironment _webHostEnvironment;
 
-        public SendMailService(IOptions<MailSettings> settings)
+        public SendMailService(IOptions<MailSettings> settings, IWebHostEnvironment webHostEnvironment)
         {
             _settings = settings.Value;
+            _webHostEnvironment = webHostEnvironment;
         }
+
+        public string GetPathOrderConfirm => Path.Combine(_webHostEnvironment.ContentRootPath, "Template", "confirm_email.txt");
+
+        public string GetPathProductList => Path.Combine(_webHostEnvironment.ContentRootPath, "Template", "list_product.txt");
 
         public async Task SendEmailAsync(string email, string subject, string htmlMessage)
         {

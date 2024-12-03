@@ -8,10 +8,12 @@ using MyStore.Repository.CartItemRepository;
 using MyStore.Repository.OrderRepository;
 using MyStore.Repository.ProductRepository;
 using MyStore.Repository.TransactionRepository;
+using MyStore.Repository.Users;
 using MyStore.Request;
 using MyStore.Response;
 using MyStore.Services.Caching;
 using MyStore.Services.Payments;
+using MyStore.Services.SendMail;
 using MyStore.Storage;
 using Net.payOS;
 using System.Linq.Expressions;
@@ -34,6 +36,9 @@ namespace MyStore.Services.Orders
         private readonly IFileStorage _fileStorage;
         private readonly IProductReviewRepository _productReviewRepository;
         private readonly ITransactionRepository _transactionRepository;
+        private readonly IUserRepository _userRepository;
+        private readonly ISendMailService _sendMailService;
+
 
         private readonly string pathReviewImages = "assets/images/reviews";
 
@@ -43,7 +48,8 @@ namespace MyStore.Services.Orders
             IMapper mapper, IPaymentService paymentService, IOrderDetailRepository orderDetailRepository,
             PayOS payOS, IServiceScopeFactory serviceScopeFactory, ICachingService cache,
             IConfiguration configuration, IFileStorage fileStorage,
-            IProductReviewRepository productReviewRepository, ITransactionRepository transactionRepository)
+            IProductReviewRepository productReviewRepository, ITransactionRepository transactionRepository,
+            IUserRepository userRepository, ISendMailService sendMailService)
         {
             _orderRepository = orderRepository;
             _productRepository = productRepository;
@@ -59,6 +65,8 @@ namespace MyStore.Services.Orders
             _fileStorage = fileStorage;
             _productReviewRepository = productReviewRepository;
             _transactionRepository = transactionRepository;
+            _userRepository = userRepository;
+            _sendMailService = sendMailService;
         }
 
         struct OrderCache
@@ -206,7 +214,7 @@ namespace MyStore.Services.Orders
                     _cache.Set("Order " + order.Id, orderCache, cacheOptions);
                 }
                 await transaction.CommitAsync();
-
+                //await SendMail(order, details);
                 return paymentUrl;
 
             }
@@ -338,8 +346,12 @@ namespace MyStore.Services.Orders
                     if (order.OrderStatus == DeliveryStatusEnum.Received)
                     {
                         order.DateReceived = DateTime.Now;
+                        var orderDetail = await _orderDetailRepository.GetAsync(e => e.OrderId == orderId);
+                        await SendEmail(order, orderDetail);
                     }
                     await _orderRepository.UpdateAsync(order);
+
+
                 }
                 else throw new Exception(ErrorMessage.ERROR);
             }
@@ -709,6 +721,78 @@ namespace MyStore.Services.Orders
                 Total = result.Sum(e => e.Total),
             };
         }
+
+        //public async Task SendEmail(Order order, IEnumerable<OrderDetail> orderDetail)
+        //{
+        //    var pathEmail = _sendMailService.GetPathOrderConfirm;
+        //    var pathProduct = _sendMailService.GetPathProductList;
+
+        //    if (File.Exists(pathEmail) && File.Exists(pathProduct))
+        //    {
+        //        var user = await _userRepository.SingleAsync(x => x.Id == order.UserId);
+
+        //        string body = File.ReadAllText(pathEmail);
+        //        body = body.Replace("{OrderDate}", order.OrderDate.ToString());
+        //        body = body.Replace("{UserName}", order.Receiver);
+        //        body = body.Replace("{Address}", order.DeliveryAddress);
+        //        body = body.Replace("{Method}", order.PaymentMethodName);
+
+        //        string productList = File.ReadAllText(pathProduct);
+        //        string listProductBody = "";
+
+        //        foreach (var item in orderDetail)
+        //        {
+        //            string res = productList.Replace("{PRODUCTNAME}", item.ProductName);
+        //            res = res.Replace("{QUANTITY}", item.Quantity.ToString());
+        //            listProductBody += res;
+        //        }
+        //        body = body.Replace("{list_product}", listProductBody);
+        //        _ = Task.Run(() => _sendMailService.SendEmailAsync(user.Email!, "Cảm ơn bạn đã đặt hàng tại ZuiZui Shop!", body));
+        //    }
+        //}
+
+        public async Task SendEmail(Order order, IEnumerable<OrderDetail> orderDetail)
+        {
+            var pathEmail = _sendMailService.GetPathOrderConfirm;
+            var pathProduct = _sendMailService.GetPathProductList;
+
+            if (File.Exists(pathEmail) && File.Exists(pathProduct))
+            {
+                var user = await _userRepository.SingleAsync(x => x.Id == order.UserId);
+                if (user != null)
+                {
+                    string body = File.ReadAllText(pathEmail);
+                    body = body.Replace("{OrderId}", order.Id.ToString());
+                    body = body.Replace("{OrderDate}", order.OrderDate.ToString("dd/MM/yyyy"));
+                    body = body.Replace("{DateReceived}", order.DateReceived.ToString("dd/MM/yyyy"));
+                    body = body.Replace("{UserName}", order.Receiver);
+                    body = body.Replace("{TotalPrice}", order.Total.ToString("N0"));
+                    body = body.Replace("{ShippingCost}", order.ShippingCost.ToString("N0"));
+
+                    string productList = File.ReadAllText(pathProduct);
+                    string listProductBody = "";
+
+                    foreach (var item in orderDetail)
+                    {
+                        string res = productList.Replace("{PRODUCTNAME}", item.ProductName)
+                                                .Replace("{QUANTITY}", item.Quantity.ToString())
+                                                .Replace("{PRICE}", item.Price.ToString("N0"));
+                        listProductBody += res;
+                    }
+
+                    body = body.Replace("{list_product}", listProductBody);
+
+                    _ = Task.Run(() => _sendMailService.SendEmailAsync(
+                        user.Email!,
+                        "Cảm ơn bạn đã đặt hàng tại ZuiZui Shop!",
+                        body
+                    ));
+                }
+
+
+            }
+        }
+
     }
 
 

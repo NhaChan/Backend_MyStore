@@ -1,5 +1,6 @@
 ﻿using MyStore.DTO;
 using MyStore.Enumerations;
+using MyStore.Models;
 using MyStore.Request;
 using MyStore.Response;
 
@@ -25,5 +26,7 @@ namespace MyStore.Services.Orders
         Task<SalesResposeYearMonth> GetSaleYearMonth(int year, int? month);
         Task<SaleByProductReponse> GetProductSaleYear(int productId, int year, int? month);
         Task<SaleProductReponse> GetProductSaleDate(int productId, DateTime from, DateTime to);
+
+        Task SendEmail(Order order, IEnumerable<OrderDetail> orderDetail);
     }
 }

@@ -1,0 +1,31 @@
+﻿<table style="width: 100%; border-collapse: collapse; font-family: Arial, sans-serif;">
+    <tr>
+        <td style="padding: 20px; background-color: #f9f9f9;">
+            <h3 style="margin: 0;">Xin chào {UserName},</h3>
+            <p>Đơn hàng <b> #{OrderId}</b> của bạn đã được đặt vào ngày {OrderDate}.</p>
+            <br />
+            <p>Đã được giao vào ngày {DateReceived}.</p>
+        </td>
+    </tr>
+    <tr>
+        <td style="padding: 20px;">
+            <h4>THÔNG TIN ĐƠN HÀNG - DÀNH CHO NGƯỜI MUA</h4>
+            <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+                <tr>
+                    <th style="border: 1px solid #ddd; padding: 10px;">Sản phẩm</th>
+                    <th style="border: 1px solid #ddd; padding: 10px;">Số lượng</th>
+                    <th style="border: 1px solid #ddd; padding: 10px;">Tạm tính</th>
+                </tr>
+                {list_product}
+            </table>
+            <p style="text-align: right; margin-top: 10px;">Phí giao hàng: <b>{ShippingCost}</b></p>
+            <p style="text-align: right; margin-top: 10px;">Tổng tiền: <b>{TotalPrice}</b></p>
+        </td>
+    </tr>
+    <tr>
+        <td style="padding: 20px; background-color: #f9f9f9; text-align: center;">
+            <p>Cảm ơn bạn đã mua sắm tại ZuiZui Shop!</p>
+            <a href="http://localhost:3000/orders" style="background-color: #f57224; color: white; text-decoration: none; padding: 10px 20px; border-radius: 5px;">Đánh giá đơn hàng</a>
+        </td>
+    </tr>
+</table>
