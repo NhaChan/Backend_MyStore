@@ -1,0 +1,5 @@
+﻿<tr>
+    <td style="border: 1px solid #ddd; padding: 10px;">{PRODUCTNAME}</td>
+    <td style="border: 1px solid #ddd; padding: 10px; text-align: center;">{QUANTITY}</td>
+    <td style="border: 1px solid #ddd; padding: 10px; text-align: right;">{PRICE}</td>
+</tr>

@@ -69,6 +69,8 @@ ScaffoldingReadMe.txt
 # StyleCop
 StyleCopReport.xml
 
+**/Migrations/
+
 # Files built by Visual Studio
 *_i.c
 *_p.c
@@ -326,7 +328,7 @@ __pycache__/
 # Telerik's JustMock configuration file
 *.jmconfig
 
-# BizTalk build output
+# BizTalk build outputmigration
 *.btp.cs
 *.btm.cs
 *.odx.cs
