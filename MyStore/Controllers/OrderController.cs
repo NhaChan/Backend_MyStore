@@ -9,7 +9,7 @@ namespace MyStore.Controllers
 {
     [Route("api/orders")]
     [ApiController]
-    [Authorize]
+    //[Authorize]
     public class OrderController(IOrderService orderService) : ControllerBase
     {
         private readonly IOrderService _orderService = orderService;
@@ -253,6 +253,20 @@ namespace MyStore.Controllers
             catch (InvalidDataException ex)
             {
                 return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
+
+        [HttpGet("descending-by-sold-current-month")]
+        public async Task<IActionResult> DescendingBySoldInCurrentMonth([FromQuery] PageRequest request)
+        {
+            try
+            {
+                var res = await _orderService.OrderByDescendingBySold(request.page, request.pageSize);
+                return Ok(res);
             }
             catch (Exception ex)
             {

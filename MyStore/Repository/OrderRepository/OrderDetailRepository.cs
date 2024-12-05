@@ -1,7 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using MyStore.Data;
+using MyStore.DTO;
 using MyStore.Models;
 using MyStore.Repository.CommonRepository;
+using MyStore.Services;
 using System.Linq.Expressions;
 
 namespace MyStore.Repository.OrderRepository
@@ -17,6 +19,28 @@ namespace MyStore.Repository.OrderRepository
                 .Include(e => e.Product)
                     .ThenInclude(e => e != null ? e.Images : null)
                 .ToListAsync();
+        }
+
+        public async Task<IEnumerable<Product>> OrderByDescendingBySoldInCurrentMonth(int page, int pageSize)
+        {
+            var currentMonth = DateTime.UtcNow.Month;
+            var currentYear = DateTime.UtcNow.Year;
+
+            var result = await _context.OrderDetails
+            .Where(od => 
+                        od.Order.DateReceived.Month == currentMonth &&
+                        od.Order.DateReceived.Year == currentYear)
+            .GroupBy(od => new { od.ProductName })
+            .Select(g => new Product
+            {
+                Name = g.Key.ProductName,
+                Sold = g.Sum(od => od.Quantity)
+            })
+            .OrderByDescending(p => p.Sold)
+            .Paginate(page, pageSize)
+            .ToListAsync();
+
+            return result;
         }
     }
 }

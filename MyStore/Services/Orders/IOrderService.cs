@@ -28,5 +28,6 @@ namespace MyStore.Services.Orders
         Task<SaleProductReponse> GetProductSaleDate(int productId, DateTime from, DateTime to);
 
         Task SendEmail(Order order, IEnumerable<OrderDetail> orderDetail);
+        Task<PagedResponse<Product>> OrderByDescendingBySold(int page, int pageSize);
     }
 }

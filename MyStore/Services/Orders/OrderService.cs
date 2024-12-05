@@ -793,6 +793,26 @@ namespace MyStore.Services.Orders
             }
         }
 
+        public async Task<PagedResponse<Product>> OrderByDescendingBySold(int page, int pageSize)
+        {
+            int totalProduct;
+            IEnumerable<Product> products;
+            totalProduct = await _productRepository.CountAsync();
+            products = await _orderDetailRepository.OrderByDescendingBySoldInCurrentMonth(page, pageSize);
+
+            //totalProduct = products.Count();
+
+            var res = _mapper.Map<IEnumerable<Product>>(products);
+            
+            return new PagedResponse<Product>
+            {
+                Items = res,
+                Page = page,
+                PageSize = pageSize,
+                TotalItems = totalProduct
+            };
+        }
+
     }
 
 
