@@ -290,6 +290,11 @@ namespace MyStore.Services.Users
             {
                 try
                 {
+                    var existingUser = await _userManager.FindByEmailAsync(user.Email);
+                    if (existingUser != null)
+                    {
+                        throw new InvalidDataException(ErrorMessage.EXISTED); // You can customize the message as needed
+                    }
                     var User = new User()
                     {
                         Email = user.Email,
@@ -303,11 +308,12 @@ namespace MyStore.Services.Users
 
                     };
                     var result = await _userManager.CreateAsync(User, user.Password);
-                    var email = await _userManager.FindByEmailAsync(user.Email);
-                    if (email != null)
-                    {
-                        throw new InvalidDataException(ErrorMessage.EXISTED);
-                    }
+
+                    //var email = await _userManager.FindByEmailAsync(user.Email);
+                    //if (email != null)
+                    //{
+                    //    throw new InvalidDataException(ErrorMessage.EXISTED);
+                    //}
                     if (!result.Succeeded)
                     {
                         throw new Exception(ErrorMessage.INVALID);
@@ -325,6 +331,8 @@ namespace MyStore.Services.Users
                         PhoneNumber = User.PhoneNumber,
                         FullName = User.FullName,
                         Roles = user.Roles,
+                        CreatedAt = DateTime.UtcNow,
+                        UpdatedAt = DateTime.UtcNow,
                     };
                 }
                 catch (Exception ex)
@@ -361,6 +369,12 @@ namespace MyStore.Services.Users
                         //if (user.Password != null)
                         //{
                         //    existingUser.PasswordHash = _passageHasher.HashPassword(existingUser, user.Password);
+                        //}
+
+                        //var email = await _userManager.FindByEmailAsync(user.Email);
+                        //if (email != null)
+                        //{
+                        //    throw new InvalidDataException(ErrorMessage.EXISTED);
                         //}
 
                         if (!string.IsNullOrEmpty(user.Password) && _passageHasher != null)

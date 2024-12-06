@@ -9,7 +9,7 @@ namespace MyStore.Controllers
 {
     [Route("api/orders")]
     [ApiController]
-    //[Authorize]
+    [Authorize]
     public class OrderController(IOrderService orderService) : ControllerBase
     {
         private readonly IOrderService _orderService = orderService;
@@ -177,7 +177,7 @@ namespace MyStore.Controllers
         }
 
         [HttpPut("shipping/{orderId}")]
-        [Authorize(Roles = "Admin,Statist")]
+        [Authorize(Roles = "Admin,CSKH,Statist")]
         public async Task<IActionResult> Shipping(long orderId, [FromBody] OrderToShippingRequest request)
         {
             try

@@ -27,7 +27,7 @@ namespace MyStore.Controllers
         }
 
         [HttpGet("byYear")]
-        [Authorize(Roles = "Admin,Statist")]
+        [Authorize(Roles = "Admin,Statist,CSKH")]
         public async Task<IActionResult> GetByYear(int year, int? month)
         {
             try

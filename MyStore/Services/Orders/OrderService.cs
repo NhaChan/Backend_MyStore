@@ -668,15 +668,15 @@ namespace MyStore.Services.Orders
 
         public async Task<SalesRespose> GetSaleDate(DateTime from, DateTime to)
         {
-            var result = await _orderRepository.GetAsync(e => e.DateReceived >= from && e.DateReceived <= to.AddDays(1)
-                && (e.OrderStatus == DeliveryStatusEnum.Received || e.OrderStatus == DeliveryStatusEnum.Finish));
+            var result = await _orderRepository.GetAsync(e => e.OrderDate >= from && e.OrderDate <= to.AddDays(1)
+                && e.OrderStatus != DeliveryStatusEnum.Canceled);
 
             var saleList = result.Select(e => new OrderDTO
             {
                 Id = e.Id,
                 Total = e.Total,
                 PaymentMethodName = e.PaymentMethodName,
-                DateReceived = e.DateReceived,
+                OrderDate = e.OrderDate,
 
             }).ToList();
 
@@ -797,7 +797,7 @@ namespace MyStore.Services.Orders
         {
             int totalProduct;
             IEnumerable<Product> products;
-            totalProduct = await _productRepository.CountAsync();
+            totalProduct = await _orderDetailRepository.CountSold();
             products = await _orderDetailRepository.OrderByDescendingBySoldInCurrentMonth(page, pageSize);
 
             //totalProduct = products.Count();

@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using MyStore.Data;
 using MyStore.DTO;
+using MyStore.Enumerations;
 using MyStore.Models;
 using MyStore.Repository.CommonRepository;
 using MyStore.Services;
@@ -23,17 +24,19 @@ namespace MyStore.Repository.OrderRepository
 
         public async Task<IEnumerable<Product>> OrderByDescendingBySoldInCurrentMonth(int page, int pageSize)
         {
-            var currentMonth = DateTime.UtcNow.Month;
-            var currentYear = DateTime.UtcNow.Year;
+            var currentMonth = DateTime.Today.Month;
+            var currentYear = DateTime.Today.Year;
 
             var result = await _context.OrderDetails
-            .Where(od => 
-                        od.Order.DateReceived.Month == currentMonth &&
-                        od.Order.DateReceived.Year == currentYear)
-            .GroupBy(od => new { od.ProductName })
+            .Where(od => od.ProductId != null &&
+                        od.Order.OrderDate.Month == currentMonth &&
+                        od.Order.OrderDate.Year == currentYear && od.Order.OrderStatus != DeliveryStatusEnum.Canceled)
+            .GroupBy(od => od.ProductId)
+            //.GroupBy(od => new { od.ProductId, od.ProductName})
             .Select(g => new Product
             {
-                Name = g.Key.ProductName,
+                Id = g.Key ?? 0,
+                Name = g.FirstOrDefault() != null ? g.First().ProductName : "",
                 Sold = g.Sum(od => od.Quantity)
             })
             .OrderByDescending(p => p.Sold)
@@ -41,6 +44,22 @@ namespace MyStore.Repository.OrderRepository
             .ToListAsync();
 
             return result;
+        }
+
+        public async Task<int> CountSold()
+        {
+            var currentMonth = DateTime.UtcNow.Month;
+            var currentYear = DateTime.UtcNow.Year;
+
+            var totalCount = await _context.OrderDetails
+                .Where(od => od.ProductId != null &&
+                    od.Order.OrderDate.Month == currentMonth &&
+                    od.Order.OrderDate.Year == currentYear &&
+                    od.Order.OrderStatus != DeliveryStatusEnum.Canceled)
+                .GroupBy(od => od.ProductId)
+                .CountAsync();
+
+            return totalCount;
         }
     }
 }

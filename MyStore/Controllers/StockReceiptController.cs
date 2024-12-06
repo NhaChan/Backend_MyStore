@@ -33,7 +33,7 @@ namespace MyStore.Controllers
         }
 
         [HttpGet]
-        [Authorize(Roles = "Admin,Warehouser")]
+        [Authorize(Roles = "Admin,Warehouser,Statist")]
         public async Task<IActionResult> GetAll([FromQuery] PageRequest request)
         {
             var result = await _stockReceiptService.GetAllStock(request.page, request.pageSize, request.search);
@@ -41,7 +41,7 @@ namespace MyStore.Controllers
         }
 
         [HttpGet("{id}")]
-        [Authorize(Roles = "Admin,Warehouser")]
+        [Authorize(Roles = "Admin,Warehouser,Statist")]
         public async Task<IActionResult> GetStockDetail(long id)
         {
             try
