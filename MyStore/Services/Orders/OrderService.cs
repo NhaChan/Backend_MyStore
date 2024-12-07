@@ -793,7 +793,7 @@ namespace MyStore.Services.Orders
             }
         }
 
-        public async Task<PagedResponse<Product>> OrderByDescendingBySold(int page, int pageSize)
+        public async Task<PagedResponse<ProductDTO>> OrderByDescendingBySold(int page, int pageSize)
         {
             int totalProduct;
             IEnumerable<Product> products;
@@ -802,9 +802,14 @@ namespace MyStore.Services.Orders
 
             //totalProduct = products.Count();
 
-            var res = _mapper.Map<IEnumerable<Product>>(products);
+            var res = _mapper.Map<IEnumerable<ProductDTO>>(products)
+                .Select(e =>
+                {
+                    e.ImageUrl = e.Description;
+                    return e;
+                });
             
-            return new PagedResponse<Product>
+            return new PagedResponse<ProductDTO>
             {
                 Items = res,
                 Page = page,

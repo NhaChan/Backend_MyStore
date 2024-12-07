@@ -37,6 +37,7 @@ namespace MyStore.Repository.OrderRepository
             {
                 Id = g.Key ?? 0,
                 Name = g.FirstOrDefault() != null ? g.First().ProductName : "",
+                Description = g.FirstOrDefault() != null ? g.First().ImageUrl : "",
                 Sold = g.Sum(od => od.Quantity)
             })
             .OrderByDescending(p => p.Sold)
@@ -48,8 +49,8 @@ namespace MyStore.Repository.OrderRepository
 
         public async Task<int> CountSold()
         {
-            var currentMonth = DateTime.UtcNow.Month;
-            var currentYear = DateTime.UtcNow.Year;
+            var currentMonth = DateTime.Today.Month;
+            var currentYear = DateTime.Today.Year;
 
             var totalCount = await _context.OrderDetails
                 .Where(od => od.ProductId != null &&
