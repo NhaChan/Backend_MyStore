@@ -72,7 +72,7 @@ namespace MyStore.Controllers
             try
             {
                 var role = User.FindAll(ClaimTypes.Role).Select(e => e.Value);
-                var isAdmin = role.Contains("Admin");
+                var isAdmin = role.Any(e => e.Equals("Admin") || e.Equals("Warehouser") || e.Equals("CSKH") || e.Equals("Statist"));
 
                 if(isAdmin)
                 {

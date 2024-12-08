@@ -768,6 +768,9 @@ namespace MyStore.Services.Orders
                     body = body.Replace("{UserName}", order.Receiver);
                     body = body.Replace("{TotalPrice}", order.Total.ToString("N0"));
                     body = body.Replace("{ShippingCost}", order.ShippingCost.ToString("N0"));
+                    body = body.Replace("{PaymentMethodName}", order.PaymentMethodName);
+                    body = body.Replace("{AmountPaid}", order.AmountPaid.ToString("N0"));
+
 
                     string productList = File.ReadAllText(pathProduct);
                     string listProductBody = "";

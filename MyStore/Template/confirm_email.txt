@@ -3,7 +3,7 @@
         <td style="padding: 20px; background-color: #f9f9f9;">
             <h3 style="margin: 0;">Xin chào {UserName},</h3>
             <p>Đơn hàng <b> #{OrderId}</b> của bạn đã được đặt vào ngày {OrderDate}.</p>
-            <br />
+            <p>Phương thức thanh toán: {PaymentMethodName}.</p>
             <p>Đã được giao vào ngày {DateReceived}.</p>
         </td>
     </tr>
@@ -18,8 +18,9 @@
                 </tr>
                 {list_product}
             </table>
-            <p style="text-align: right; margin-top: 10px;">Phí giao hàng: <b>{ShippingCost}</b></p>
-            <p style="text-align: right; margin-top: 10px;">Tổng tiền: <b>{TotalPrice}</b></p>
+            <p style="text-align: right; margin-top: 10px;">Phí giao hàng: <b>{ShippingCost}đ</b></p>
+            <p style="text-align: right; margin-top: 10px;">Tổng tiền: <b>{TotalPrice}đ</b></p>
+             <p style="text-align: right; margin-top: 10px;">Đã thanh toán: <b>{AmountPaid}đ</b></p>
         </td>
     </tr>
     <tr>
